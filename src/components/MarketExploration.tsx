@@ -30,14 +30,26 @@ export const MarketExploration: React.FC = () => {
     setWebhookResponse(null);
 
     try {
-      const response = await fetch(`${N8N_WEBHOOK_URL}?cep=${encodeURIComponent(cep)}&raio=${encodeURIComponent(radius)}`);
+      console.log('Enviando n8n request', { url: N8N_WEBHOOK_URL, cep, radius });
+      const response = await fetch(N8N_WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cep, raio: radius }),
+      });
+
       if (!response.ok) {
-        throw new Error(`Erro ao consultar n8n: ${response.status} ${response.statusText}`);
+        const serverText = await response.text();
+        throw new Error(`Erro ao consultar n8n: ${response.status} ${response.statusText} - ${serverText}`);
       }
+
       const data = await response.json();
       setWebhookResponse(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('Erro no request n8n', msg, err);
+      setError(`Falha de conexão com n8n: ${msg}`);
     } finally {
       setLoading(false);
     }
