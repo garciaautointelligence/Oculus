@@ -78,7 +78,7 @@ export const AutomationEngine: React.FC = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-                { name: 'Google Maps API', status: 'Connected', icon: Globe },
+              {name: 'Garcia Intelligence API', status: 'Connected', icon: Globe },
                 { name: 'Social Scraper Engine', status: 'Active', icon: Shield },
                 { name: 'Web Vitals Analyzer', status: 'Connected', icon: RefreshCw },
                 { name: 'Export Hub (PDF/CSV)', status: 'Active', icon: Save },

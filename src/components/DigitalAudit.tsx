@@ -141,7 +141,7 @@ export const DigitalAudit: React.FC = () => {
                 {[
                   { channel: 'Instagram', code: 'IG', issue: 'Baixo uso de Reels para novos cafés', prio: 'ALTA', time: '7-10 dias', color: 'text-primary' },
                   { channel: 'Website', code: 'WB', issue: 'Imagens sem tags \'alt\' descritivas', prio: 'MÉDIA', time: '2 dias', color: 'text-indigo-400' },
-                  { channel: 'Google Maps', code: 'GM', issue: 'Avaliações sem resposta há > 30 dias', prio: 'ALTA', time: 'Imediato', color: 'text-tertiary' },
+                  { channel: 'Garcia Intelligence', code: 'GI', issue: 'Avaliações sem resposta há > 30 dias', prio: 'ALTA', time: 'Imediato', color: 'text-tertiary' },
                 ].map((row, i) => (
                   <tr key={i} className="hover:bg-surface-bright transition-colors">
                     <td className="px-6 py-4">

@@ -31,8 +31,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
   return (
     <aside className="fixed left-0 top-0 h-full w-64 bg-surface border-r border-outline-variant/10 flex flex-col z-50">
       <div className="p-6">
-        <h1 className="text-xl font-extrabold text-on-surface font-headline tracking-tighter">Oculus Analyst</h1>
-        <p className="text-[10px] text-primary font-bold uppercase tracking-widest mt-1">Market Intelligence</p>
+        <h1 className="text-xl font-extrabold text-on-surface font-headline tracking-tighter">Oculus</h1>
+        <p className="text-[10px] text-primary font-bold uppercase tracking-widest mt-1">Garcia Intelligence</p>
       </div>
 
       <nav className="flex-1 px-4 space-y-1 mt-4">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Search, 
   MapPin, 
@@ -10,7 +10,39 @@ import {
   Building2
 } from 'lucide-react';
 
+const N8N_WEBHOOK_URL = 'https://auris-intelligence.app.n8n.cloud/webhook/09774b3e-e207-4f01-9625-41edfce0c1f2';
+
 export const MarketExploration: React.FC = () => {
+  const [cep, setCep] = useState('');
+  const [radius, setRadius] = useState('1.0');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [webhookResponse, setWebhookResponse] = useState<any>(null);
+
+  const handleRunScan = async () => {
+    if (!cep.trim()) {
+      setError('Informe um CEP válido para iniciar a varredura.');
+      return;
+    }
+
+    setError(null);
+    setLoading(true);
+    setWebhookResponse(null);
+
+    try {
+      const response = await fetch(`${N8N_WEBHOOK_URL}?cep=${encodeURIComponent(cep)}&raio=${encodeURIComponent(radius)}`);
+      if (!response.ok) {
+        throw new Error(`Erro ao consultar n8n: ${response.status} ${response.statusText}`);
+      }
+      const data = await response.json();
+      setWebhookResponse(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] max-w-4xl mx-auto w-full space-y-12">
       <div className="text-center space-y-4">
@@ -31,6 +63,8 @@ export const MarketExploration: React.FC = () => {
           <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant" />
           <input 
             type="text" 
+            value={cep}
+            onChange={(e) => setCep(e.target.value)}
             placeholder="Digite o CEP (ex: 04571-010)" 
             className="w-full bg-transparent border-none pl-12 pr-4 py-4 text-lg font-medium text-on-surface focus:ring-0 outline-none"
           />
@@ -38,18 +72,41 @@ export const MarketExploration: React.FC = () => {
         <div className="w-px h-8 bg-outline-variant/20 self-center hidden md:block"></div>
         <div className="flex-1 relative">
           <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant" />
-          <select className="w-full bg-transparent border-none pl-12 pr-4 py-4 text-lg font-medium text-on-surface focus:ring-0 outline-none appearance-none cursor-pointer">
-            <option>Raio de 1.0 km</option>
-            <option>Raio de 2.5 km</option>
-            <option>Raio de 5.0 km</option>
-            <option>Raio de 10.0 km</option>
+          <select
+            value={radius}
+            onChange={(e) => setRadius(e.target.value)}
+            className="w-full bg-transparent border-none pl-12 pr-4 py-4 text-lg font-medium text-on-surface focus:ring-0 outline-none appearance-none cursor-pointer"
+          >
+            <option value="1.0">Raio de 1.0 km</option>
+            <option value="2.5">Raio de 2.5 km</option>
+            <option value="5.0">Raio de 5.0 km</option>
+            <option value="10.0">Raio de 10.0 km</option>
           </select>
         </div>
-        <button className="bg-primary text-on-primary font-black px-8 py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-inverse-primary transition-all group">
-          INICIAR SCAN
+        <button
+          onClick={handleRunScan}
+          disabled={loading}
+          className="bg-primary text-on-primary font-black px-8 py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-inverse-primary transition-all group disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {loading ? 'Carregando...' : 'INICIAR SCAN'}
           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
+
+      {error && (
+        <div className="w-full bg-error-container/15 text-error-container border border-error-container/25 rounded-xl p-4 text-sm">
+          {error}
+        </div>
+      )}
+
+      {webhookResponse && (
+        <div className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-4">
+          <h3 className="font-bold text-lg mb-2">Resposta do n8n</h3>
+          <pre className="text-xs whitespace-pre-wrap break-words bg-surface-container p-3 rounded-lg">
+            {JSON.stringify(webhookResponse, null, 2)}
+          </pre>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
         <div className="bg-surface-container-high p-6 rounded-2xl border border-outline-variant/5 hover:border-primary/20 transition-colors">

@@ -2,11 +2,12 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# Oculus - Garcia Intelligence
 
-This contains everything you need to run your app locally.
+App de análise de mercado e presença digital. A integração de dados é feita via n8n (webhook) e o produto é chamado Oculus, alimentado por Garcia Intelligence.
 
-View your app in AI Studio: https://ai.studio/apps/f87de24a-e628-424c-80c3-679d59c9c959
+Webhook n8n de referência:
+`https://auris-intelligence.app.n8n.cloud/webhook/09774b3e-e207-4f01-9625-41edfce0c1f2`
 
 ## Run Locally
 
