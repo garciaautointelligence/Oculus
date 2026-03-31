@@ -9,7 +9,9 @@ import {
   UserCircle,
   Search,
   Bell,
-  Settings
+  Settings,
+  Moon,
+  Sun
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -20,12 +22,12 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'explore', label: 'Market Exploration', icon: Search },
-    { id: 'audit', label: 'Digital Audit', icon: ShieldCheck },
-    { id: 'automation', label: 'Automation Engine', icon: Settings },
-    { id: 'saved', label: 'Saved Searches', icon: Bookmark },
-    { id: 'history', label: 'History', icon: History },
+    { id: 'dashboard', label: 'Painel', icon: LayoutDashboard },
+    { id: 'explore', label: 'Explorar Mercado', icon: Search },
+    { id: 'audit', label: 'Auditoria Digital', icon: ShieldCheck },
+    { id: 'automation', label: 'Motor de Automação', icon: Settings },
+    { id: 'saved', label: 'Buscas Salvas', icon: Bookmark },
+    { id: 'history', label: 'Histórico', icon: History },
   ];
 
   return (
@@ -56,17 +58,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
       <div className="p-4 mt-auto space-y-4">
         <button className="w-full bg-gradient-to-r from-primary to-inverse-primary text-on-primary font-bold py-3 rounded-md flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-primary/10">
           <PlusCircle className="w-4 h-4" />
-          <span className="text-sm">New Analysis</span>
+          <span className="text-sm">Nova Análise</span>
         </button>
 
         <div className="pt-4 border-t border-outline-variant/10 space-y-1">
           <button className="w-full flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-on-surface transition-colors">
             <HelpCircle className="w-4 h-4" />
-            <span className="text-xs font-medium">Support</span>
+            <span className="text-xs font-medium">Suporte</span>
           </button>
           <button className="w-full flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-on-surface transition-colors">
             <UserCircle className="w-4 h-4" />
-            <span className="text-xs font-medium">Account</span>
+            <span className="text-xs font-medium">Conta</span>
           </button>
         </div>
       </div>
@@ -74,7 +76,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
   );
 };
 
-export const TopBar: React.FC = () => {
+interface TopBarProps {
+  darkMode: boolean;
+  onThemeToggle: () => void;
+}
+
+export const TopBar: React.FC<TopBarProps> = ({ darkMode, onThemeToggle }) => {
   return (
     <header className="sticky top-0 z-40 flex justify-between items-center w-full px-8 py-4 bg-surface/80 backdrop-blur-md border-b border-outline-variant/5">
       <div className="flex items-center gap-4">
@@ -86,7 +93,7 @@ export const TopBar: React.FC = () => {
         </nav>
       </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4">
         <div className="relative group hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
           <input 
@@ -95,23 +102,29 @@ export const TopBar: React.FC = () => {
             className="bg-surface-container-high border-none rounded-full pl-10 pr-4 py-2 text-sm text-on-surface focus:ring-1 focus:ring-primary w-64 transition-all outline-none"
           />
         </div>
-        
-        <div className="flex items-center gap-3">
-          <button className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors relative">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-tertiary rounded-full"></span>
-          </button>
-          <button className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
-            <Settings className="w-5 h-5" />
-          </button>
-          <div className="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30">
-            <img 
-              src="https://picsum.photos/seed/analyst/100/100" 
-              alt="User" 
-              referrerPolicy="no-referrer"
-              className="w-full h-full object-cover"
-            />
-          </div>
+
+        <button
+          onClick={onThemeToggle}
+          className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors"
+          aria-label="Alternar tema"
+        >
+          {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+        </button>
+
+        <button className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors relative">
+          <Bell className="w-5 h-5" />
+          <span className="absolute top-2 right-2 w-2 h-2 bg-tertiary rounded-full"></span>
+        </button>
+        <button className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
+          <Settings className="w-5 h-5" />
+        </button>
+        <div className="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30">
+          <img 
+            src="https://picsum.photos/seed/analyst/100/100" 
+            alt="User" 
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover"
+          />
         </div>
       </div>
     </header>

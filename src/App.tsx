@@ -1,46 +1,50 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Sidebar, TopBar } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { DigitalAudit } from './components/DigitalAudit';
 import { MarketExploration } from './components/MarketExploration';
 import { AutomationEngine } from './components/AutomationEngine';
-import { motion, AnimatePresence } from 'motion/react';
+import { SavedSearches } from './components/SavedSearches';
+import { HistoryPanel } from './components/History';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('oculus-theme');
+    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+    setDarkMode(savedTheme ? savedTheme === 'dark' : prefersDark);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+    localStorage.setItem('oculus-theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
 
   return (
-    <div className="flex min-h-screen bg-surface">
+    <div className="flex min-h-screen bg-surface text-on-surface">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       
-      <main className="ml-64 flex-1 flex flex-col">
-        <TopBar />
+      <main className="ml-64 flex-1 flex flex-col min-h-screen">
+        <TopBar darkMode={darkMode} onThemeToggle={() => setDarkMode((current) => !current)} />
         
         <div className="p-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
             >
               {activeTab === 'dashboard' && <Dashboard />}
               {activeTab === 'explore' && <MarketExploration />}
               {activeTab === 'audit' && <DigitalAudit />}
               {activeTab === 'automation' && <AutomationEngine />}
-              {activeTab === 'saved' && (
-                <div className="flex flex-col items-center justify-center h-[60vh] text-on-surface-variant">
-                  <p className="text-lg font-medium">Saved Searches View</p>
-                  <p className="text-sm">This section is under development.</p>
-                </div>
-              )}
-              {activeTab === 'history' && (
-                <div className="flex flex-col items-center justify-center h-[60vh] text-on-surface-variant">
-                  <p className="text-lg font-medium">Full History View</p>
-                  <p className="text-sm">This section is under development.</p>
-                </div>
-              )}
+              {activeTab === 'saved' && <SavedSearches />}
+              {activeTab === 'history' && <HistoryPanel />}
             </motion.div>
           </AnimatePresence>
         </div>

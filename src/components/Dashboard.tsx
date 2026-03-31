@@ -1,23 +1,10 @@
 import React from 'react';
-import { 
-  QueryStats, 
-  LocationOn, 
-  Storefront, 
-  Download, 
-  CalendarToday, 
-  FilterList,
-  PinDrop,
-  OpenInNew,
-  ChevronLeft,
-  ChevronRight,
-  Insights
-} from '@mui/icons-material'; // Wait, I should use Lucide as per guidelines.
-import { 
-  BarChart3, 
-  MapPin, 
-  Store, 
-  Download as DownloadIcon, 
-  Calendar, 
+import {
+  BarChart3,
+  MapPin,
+  Store,
+  Download as DownloadIcon,
+  Calendar,
   Filter,
   ExternalLink,
   ChevronLeft as ChevronLeftIcon,

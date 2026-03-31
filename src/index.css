@@ -59,3 +59,39 @@
     scrollbar-width: none;
   }
 }
+
+html.dark {
+  --color-surface: #02050e;
+  --color-surface-dim: #080a14;
+  --color-surface-bright: #1f2a44;
+  --color-surface-container-lowest: #070d1f;
+  --color-surface-container-low: #111a2f;
+  --color-surface-container: #141d32;
+  --color-surface-container-high: #1f2b43;
+  --color-surface-container-highest: #26314e;
+  --color-surface-variant: rgba(23, 34, 58, 0.55);
+
+  --color-primary: #c6d0ff;
+  --color-primary-container: #16248b;
+  --color-on-primary: #e6e8ff;
+  --color-inverse-primary: #3a5bff;
+  --color-primary-fixed: #e6e8ff;
+  --color-primary-fixed-dim: #c6d0ff;
+
+  --color-secondary: #d1d9ee;
+  --color-secondary-container: #2f3f5d;
+  --color-on-secondary: #e2e8ff;
+  --color-on-secondary-container: #c9d2ef;
+
+  --color-tertiary: #56f3d1;
+  --color-tertiary-container: #004a3f;
+  --color-on-tertiary: #d7fff2;
+
+  --color-error: #ffb4ab;
+  --color-error-container: #93000a;
+
+  --color-on-surface: #f5f7ff;
+  --color-on-surface-variant: #c3c8dc;
+  --color-outline: #a1a4b5;
+  --color-outline-variant: #59607a;
+}

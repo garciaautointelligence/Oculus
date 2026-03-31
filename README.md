@@ -7,7 +7,7 @@
 App de análise de mercado e presença digital. A integração de dados é feita via n8n (webhook) e o produto é chamado Oculus, alimentado por Garcia Intelligence.
 
 Webhook n8n de referência:
-`https://auris-intelligence.app.n8n.cloud/webhook/09774b3e-e207-4f01-9625-41edfce0c1f2`
+`https://auris-intelligence.app.n8n.cloud/webhook/oculus`
 
 ## Run Locally
 

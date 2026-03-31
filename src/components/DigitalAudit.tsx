@@ -17,15 +17,15 @@ export const DigitalAudit: React.FC = () => {
     <div className="space-y-12 max-w-7xl mx-auto w-full">
       <section className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h2 className="text-4xl font-headline font-extrabold text-on-surface tracking-tight mb-2">Artisan Coffee Co.</h2>
+          <h2 className="text-4xl font-headline font-extrabold text-on-surface tracking-tight mb-2">Café Artesanal</h2>
           <p className="text-on-surface-variant flex items-center gap-2">
             <MapPin className="w-4 h-4" />
-            São Paulo, Brasil • <span className="text-tertiary">Premium Roastery</span>
+            São Paulo, Brasil • <span className="text-tertiary">Torraria Premium</span>
           </p>
         </div>
         <div className="flex gap-4">
           <div className="flex flex-col items-end">
-            <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Global Score</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Pontuação Global</span>
             <span className="text-4xl font-headline font-black text-primary">88<span className="text-xl">/100</span></span>
           </div>
           <div className="w-px h-12 bg-outline-variant/30"></div>

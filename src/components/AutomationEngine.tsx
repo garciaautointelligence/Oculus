@@ -17,7 +17,7 @@ export const AutomationEngine: React.FC = () => {
       <section>
         <div className="mb-2">
           <span className="text-primary font-bold text-xs tracking-widest uppercase">Configurações Avançadas</span>
-          <h3 className="text-4xl font-headline font-extrabold text-on-surface mt-1">Automation Engine</h3>
+          <h3 className="text-4xl font-headline font-extrabold text-on-surface mt-1">Motor de Automação</h3>
         </div>
         <p className="text-on-surface-variant">
           Configure os parâmetros de varredura, integrações de API e lógica de saúde digital para automação de relatórios.
@@ -29,9 +29,8 @@ export const AutomationEngine: React.FC = () => {
           <div className="bg-surface-container-high rounded-2xl p-8 border border-outline-variant/10">
             <div className="flex items-center gap-3 mb-8">
               <Cpu className="w-6 h-6 text-primary" />
-              <h4 className="text-xl font-headline font-bold">Regional Deep Scan</h4>
+                  <h4 className="text-xl font-headline font-bold">Varredura Regional Profunda</h4>
             </div>
-            
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -73,15 +72,14 @@ export const AutomationEngine: React.FC = () => {
           <div className="bg-surface-container-high rounded-2xl p-8 border border-outline-variant/10">
             <div className="flex items-center gap-3 mb-8">
               <Database className="w-6 h-6 text-tertiary" />
-              <h4 className="text-xl font-headline font-bold">Integration Stack</h4>
+                  <h4 className="text-xl font-headline font-bold">Pilha de Integração</h4>
             </div>
-            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-              {name: 'Garcia Intelligence API', status: 'Connected', icon: Globe },
-                { name: 'Social Scraper Engine', status: 'Active', icon: Shield },
-                { name: 'Web Vitals Analyzer', status: 'Connected', icon: RefreshCw },
-                { name: 'Export Hub (PDF/CSV)', status: 'Active', icon: Save },
+              {name: 'API Garcia Intelligence', status: 'Conectado', icon: Globe },
+                { name: 'Motor de Coleta Social', status: 'Ativo', icon: Shield },
+                { name: 'Analisador de Web Vitals', status: 'Conectado', icon: RefreshCw },
+                { name: 'Exportação (PDF/CSV)', status: 'Ativo', icon: Save },
               ].map((integration, i) => (
                 <div key={i} className="bg-surface-container p-4 rounded-xl flex items-center justify-between border border-outline-variant/5">
                   <div className="flex items-center gap-3">
@@ -99,16 +97,16 @@ export const AutomationEngine: React.FC = () => {
           <div className="bg-surface-container-high rounded-2xl p-8 border border-outline-variant/10">
             <div className="flex items-center gap-3 mb-6">
               <Sliders className="w-5 h-5 text-secondary" />
-              <h4 className="text-lg font-headline font-bold">Health Logic</h4>
+              <h4 className="text-lg font-headline font-bold">Lógica de Saúde</h4>
             </div>
             <p className="text-xs text-on-surface-variant mb-6">Defina os pesos para o cálculo do Score Global de presença digital.</p>
             
             <div className="space-y-6">
               {[
-                { label: 'Social Media', weight: 40 },
-                { label: 'Web Performance', weight: 30 },
-                { label: 'SEO Visibility', weight: 20 },
-                { label: 'User Feedback', weight: 10 },
+                { label: 'Redes Sociais', weight: 40 },
+                { label: 'Desempenho Web', weight: 30 },
+                { label: 'Visibilidade SEO', weight: 20 },
+                { label: 'Feedback de Usuário', weight: 10 },
               ].map((item, i) => (
                 <div key={i}>
                   <div className="flex justify-between text-xs mb-2">
