@@ -10,7 +10,7 @@ import {
   Database,
   Zap
 } from 'lucide-react';
-import { buscarLeads } from './supabase-client';
+import { buscarLeads } from '../lib/supabase-client'; // ← ajuste o path se necessário
 
 export const MarketExploration: React.FC = () => {
   const [cep, setCep] = useState('');
@@ -50,9 +50,9 @@ export const MarketExploration: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] max-w-4xl mx-auto w-full space-y-12">
+    <div className="flex flex-col items-center justify-center min-h-[80vh] max-w-4xl mx-auto w-full space-y-12 p-6 card-soft gradient-panel">
       <div className="text-center space-y-4">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs font-bold uppercase tracking-widest">
           <Compass className="w-3 h-3" />
           Inteligência de Mercado
         </div>
@@ -65,7 +65,7 @@ export const MarketExploration: React.FC = () => {
       </div>
 
       {/* Barra de busca */}
-      <div className="w-full bg-surface-container p-2 rounded-2xl border border-outline-variant/10 shadow-2xl shadow-primary/10 flex flex-col md:flex-row gap-2">
+      <div className="w-full bg-surface-container p-2 rounded-2xl border border-outline-variant/10 shadow-2xl shadow-primary/10 flex flex-col md:flex-row gap-2 card-soft">
         <div className="flex-1 relative">
           <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant" />
           <input 

@@ -5,39 +5,39 @@
   --font-headline: "Manrope", sans-serif;
   --font-body: "Inter", sans-serif;
 
-  --color-surface: #0b1326;
-  --color-surface-dim: #0b1326;
-  --color-surface-bright: #31394d;
-  --color-surface-container-lowest: #060e20;
-  --color-surface-container-low: #131b2e;
-  --color-surface-container: #171f33;
-  --color-surface-container-high: #222a3d;
-  --color-surface-container-highest: #2d3449;
-  --color-surface-variant: rgba(45, 52, 73, 0.4);
+  --color-surface: #050608;
+  --color-surface-dim: #07080d;
+  --color-surface-bright: #1e2531;
+  --color-surface-container-lowest: #080b14;
+  --color-surface-container-low: #11161f;
+  --color-surface-container: #161b24;
+  --color-surface-container-high: #1f2632;
+  --color-surface-container-highest: #28313f;
+  --color-surface-variant: rgba(38, 38, 45, 0.7);
 
-  --color-primary: #bbc3ff;
-  --color-primary-container: #001d92;
-  --color-on-primary: #001d93;
-  --color-inverse-primary: #2848ee;
-  --color-primary-fixed: #dee0ff;
-  --color-primary-fixed-dim: #bbc3ff;
+  --color-primary: #bf1e2f;
+  --color-primary-container: #4d101c;
+  --color-on-primary: #fff7f8;
+  --color-inverse-primary: #ff6464;
+  --color-primary-fixed: #ff9ca0;
+  --color-primary-fixed-dim: #dd5f6b;
 
-  --color-secondary: #b9c7df;
-  --color-secondary-container: #3c4a5e;
-  --color-on-secondary: #233144;
-  --color-on-secondary-container: #abb9d1;
+  --color-secondary: #9aa2b8;
+  --color-secondary-container: #2f3443;
+  --color-on-secondary: #e6e9f5;
+  --color-on-secondary-container: #b1b9d1;
 
-  --color-tertiary: #44ddc1;
-  --color-tertiary-container: #00372e;
-  --color-on-tertiary: #00382f;
+  --color-tertiary: #f58a9e;
+  --color-tertiary-container: #4a1f28;
+  --color-on-tertiary: #fff1f3;
 
-  --color-error: #ffb4ab;
-  --color-error-container: #93000a;
+  --color-error: #ff4f5e;
+  --color-error-container: #7c0a1c;
 
-  --color-on-surface: #dae2fd;
-  --color-on-surface-variant: #c6c5d4;
-  --color-outline: #908f9d;
-  --color-outline-variant: #454652;
+  --color-on-surface: #e9ebf6;
+  --color-on-surface-variant: #aab0c6;
+  --color-outline: #7a828f;
+  --color-outline-variant: #494f5f;
 }
 
 @layer base {
@@ -57,6 +57,29 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  .card-soft {
+    @apply rounded-2xl border border-outline-variant/20 bg-surface-container-high shadow-lg shadow-black/20 transition-transform transition-colors ease-out duration-350;
+  }
+
+  .card-soft:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+  }
+
+  .gradient-panel {
+    background: linear-gradient(135deg, rgba(191,30,47,0.35) 0%, rgba(33,38,51,0.8) 50%, rgba(8,10,16,0.95) 100%);
+    border: 1px solid rgba(191,30,47,0.25);
+  }
+
+  .text-flicker {
+    animation: flicker 2.5s infinite both;
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 1; filter: drop-shadow(0 0 8px rgba(191,30,47,0.8)); }
+    50% { opacity: .86; filter: drop-shadow(0 0 2px rgba(191,30,47,0.3)); }
   }
 }
 

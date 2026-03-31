@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   BarChart3,
   MapPin,
@@ -9,22 +9,60 @@ import {
   ExternalLink,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
-  TrendingUp
+  TrendingUp,
+  Loader2
 } from 'lucide-react';
 import { BarChart, Bar, ResponsiveContainer, Cell } from 'recharts';
+import { buscarHistorico } from '../lib/supabase-client'; // ← ajuste o path se necessário
 
-const data = [
-  { value: 40 },
-  { value: 60 },
-  { value: 30 },
-  { value: 80 },
-  { value: 50 },
-  { value: 90 },
-  { value: 70 },
-  { value: 100 },
-];
+type Search = {
+  id: string;
+  cep: string;
+  raio_km: number;
+  status: string;
+  total_leads: number;
+  created_at: string;
+  completed_at: string | null;
+};
+
+const PAGE_SIZE = 10;
 
 export const Dashboard: React.FC = () => {
+  const [searches, setSearches] = useState<Search[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    buscarHistorico(50)
+      .then(setSearches)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const totalBuscas = searches.length;
+  const cepsUnicos = new Set(searches.map(s => s.cep)).size;
+  const mediaLeads = totalBuscas > 0
+    ? (searches.reduce((sum, s) => sum + (s.total_leads ?? 0), 0) / totalBuscas).toFixed(1)
+    : '0';
+
+  // Dados para o gráfico — últimas 8 buscas
+  const chartData = searches.slice(0, 8).reverse().map(s => ({ value: s.total_leads ?? 0 }));
+
+  // Paginação
+  const totalPages = Math.ceil(searches.length / PAGE_SIZE);
+  const paginated = searches.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  const formatDate = (iso: string) => {
+    const d = new Date(iso);
+    return {
+      date: d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }),
+      time: d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+    };
+  };
+
+  const formatCep = (cep: string) =>
+    cep.length === 8 ? `${cep.slice(0, 5)}-${cep.slice(5)}` : cep;
+
   return (
     <div className="space-y-12">
       <section>
@@ -37,26 +75,32 @@ export const Dashboard: React.FC = () => {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
-          <div className="bg-surface-container-high p-5 rounded-xl border-l-2 border-tertiary">
+          <div className="bg-surface-container-high p-5 rounded-xl border-l-2 border-tertiary card-soft">
             <div className="flex items-center justify-between mb-2">
               <span className="text-on-surface-variant text-xs font-bold uppercase">Total de Buscas</span>
               <BarChart3 className="w-4 h-4 text-tertiary" />
             </div>
-            <div className="text-2xl font-headline font-bold">1,284</div>
+            <div className="text-2xl font-headline font-bold">
+              {loading ? <Loader2 className="w-5 h-5 animate-spin text-on-surface-variant" /> : totalBuscas.toLocaleString('pt-BR')}
+            </div>
           </div>
-          <div className="bg-surface-container-high p-5 rounded-xl">
+          <div className="bg-surface-container-high p-5 rounded-xl card-soft">
             <div className="flex items-center justify-between mb-2">
               <span className="text-on-surface-variant text-xs font-bold uppercase">CEPs Únicos</span>
               <MapPin className="w-4 h-4 text-primary" />
             </div>
-            <div className="text-2xl font-headline font-bold">412</div>
+            <div className="text-2xl font-headline font-bold">
+              {loading ? <Loader2 className="w-5 h-5 animate-spin text-on-surface-variant" /> : cepsUnicos}
+            </div>
           </div>
-          <div className="bg-surface-container-high p-5 rounded-xl">
+          <div className="bg-surface-container-high p-5 rounded-xl card-soft">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-on-surface-variant text-xs font-bold uppercase">Média de Lojas</span>
+              <span className="text-on-surface-variant text-xs font-bold uppercase">Média de Leads</span>
               <Store className="w-4 h-4 text-secondary" />
             </div>
-            <div className="text-2xl font-headline font-bold">18.4</div>
+            <div className="text-2xl font-headline font-bold">
+              {loading ? <Loader2 className="w-5 h-5 animate-spin text-on-surface-variant" /> : mediaLeads}
+            </div>
           </div>
           <button className="bg-surface-container-high p-5 rounded-xl border border-dashed border-outline-variant/40 flex flex-col items-center justify-center gap-2 text-primary hover:bg-surface-container-highest transition-colors">
             <DownloadIcon className="w-5 h-5" />
@@ -65,20 +109,16 @@ export const Dashboard: React.FC = () => {
         </div>
       </section>
 
-      <section className="bg-surface-container rounded-2xl overflow-hidden shadow-2xl shadow-primary/5">
+      <section className="bg-surface-container rounded-2xl overflow-hidden shadow-2xl shadow-primary/5 card-soft gradient-panel">
         <div className="flex items-center justify-between p-6 bg-surface-container-low/50">
           <div className="flex gap-4">
             <button className="bg-surface-container-highest px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 border border-outline-variant/20">
               <Calendar className="w-4 h-4" />
-              Últimos 30 dias
-            </button>
-            <button className="bg-surface-container-highest px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 border border-outline-variant/20">
-              <Filter className="w-4 h-4" />
-              Filtros Avançados
+              Todas as buscas
             </button>
           </div>
           <div className="text-sm text-on-surface-variant">
-            Exibindo 1-10 de 1,284 registros
+            {loading ? 'Carregando...' : `Exibindo ${paginated.length} de ${totalBuscas} registros`}
           </div>
         </div>
 
@@ -88,94 +128,136 @@ export const Dashboard: React.FC = () => {
               <tr>
                 <th className="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Data da Consulta</th>
                 <th className="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">CEP Pesquisado</th>
-                <th className="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Distância (Raio)</th>
-                <th className="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Estabelecimentos</th>
+                <th className="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Raio</th>
+                <th className="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Leads</th>
                 <th className="px-6 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-right">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/5">
-              {[
-                { date: '24 Out, 2023', time: '14:32', cep: '04571-010', dist: '5.0 km', count: 142, progress: 70 },
-                { date: '23 Out, 2023', time: '09:15', cep: '22775-040', dist: '2.5 km', count: 58, progress: 30 },
-                { date: '22 Out, 2023', time: '17:48', cep: '30140-061', dist: '10.0 km', count: 312, progress: 95 },
-                { date: '22 Out, 2023', time: '11:02', cep: '80020-000', dist: '1.0 km', count: 12, progress: 10 },
-              ].map((row, i) => (
-                <tr key={i} className="hover:bg-surface-bright/20 transition-colors group">
-                  <td className="px-6 py-5">
-                    <div className="flex flex-col">
-                      <span className="text-on-surface font-medium text-sm">{row.date}</span>
-                      <span className="text-xs text-on-surface-variant">{row.time}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-primary" />
-                      <span className="font-mono text-sm text-on-surface">{row.cep}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5 text-sm">{row.dist}</td>
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-tertiary">{row.count}</span>
-                      <div className="w-12 h-1 bg-surface-container-highest rounded-full overflow-hidden">
-                        <div className="bg-tertiary h-full" style={{ width: `${row.progress}%` }}></div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5 text-right">
-                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-2 bg-primary/10 text-primary hover:bg-primary hover:text-on-primary rounded-lg transition-all">
-                        <ExternalLink className="w-4 h-4" />
-                      </button>
-                    </div>
+              {loading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <tr key={i}>
+                    <td colSpan={5} className="px-6 py-5">
+                      <div className="h-4 bg-surface-container-high rounded animate-pulse w-full" />
+                    </td>
+                  </tr>
+                ))
+              ) : paginated.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-on-surface-variant text-sm">
+                    Nenhuma busca encontrada. Inicie uma varredura na aba Explorar.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                paginated.map((row) => {
+                  const { date, time } = formatDate(row.created_at);
+                  const maxLeads = Math.max(...searches.map(s => s.total_leads ?? 0), 1);
+                  const progress = Math.round(((row.total_leads ?? 0) / maxLeads) * 100);
+
+                  return (
+                    <tr key={row.id} className="hover:bg-surface-bright/20 transition-colors group">
+                      <td className="px-6 py-5">
+                        <div className="flex flex-col">
+                          <span className="text-on-surface font-medium text-sm">{date}</span>
+                          <span className="text-xs text-on-surface-variant">{time}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-primary" />
+                          <span className="font-mono text-sm text-on-surface">{formatCep(row.cep)}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5 text-sm">{row.raio_km} km</td>
+                      <td className="px-6 py-5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-tertiary">{row.total_leads ?? 0}</span>
+                          <div className="w-12 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+                            <div className="bg-tertiary h-full" style={{ width: `${progress}%` }} />
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5 text-right">
+                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button className="p-2 bg-primary/10 text-primary hover:bg-primary hover:text-on-primary rounded-lg transition-all">
+                            <ExternalLink className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
 
-        <div className="p-6 bg-surface-container-lowest/30 flex items-center justify-center gap-4">
-          <button className="p-2 rounded-lg bg-surface-container-highest text-on-surface-variant hover:text-on-surface transition-colors">
-            <ChevronLeftIcon className="w-5 h-5" />
-          </button>
-          <div className="flex gap-2">
-            <button className="w-8 h-8 rounded-lg bg-primary text-on-primary font-bold text-sm">1</button>
-            <button className="w-8 h-8 rounded-lg bg-surface-container-highest text-on-surface-variant text-sm hover:bg-surface-bright">2</button>
-            <button className="w-8 h-8 rounded-lg bg-surface-container-highest text-on-surface-variant text-sm hover:bg-surface-bright">3</button>
-            <span className="text-on-surface-variant">...</span>
-            <button className="w-8 h-8 rounded-lg bg-surface-container-highest text-on-surface-variant text-sm hover:bg-surface-bright">128</button>
+        {/* Paginação */}
+        {totalPages > 1 && (
+          <div className="p-6 bg-surface-container-lowest/30 flex items-center justify-center gap-4">
+            <button
+              onClick={() => setPage(p => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="p-2 rounded-lg bg-surface-container-highest text-on-surface-variant hover:text-on-surface transition-colors disabled:opacity-40"
+            >
+              <ChevronLeftIcon className="w-5 h-5" />
+            </button>
+            <div className="flex gap-2">
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setPage(i)}
+                  className={`w-8 h-8 rounded-lg text-sm font-bold transition-colors ${
+                    i === page
+                      ? 'bg-primary text-on-primary'
+                      : 'bg-surface-container-highest text-on-surface-variant hover:bg-surface-bright'
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+              disabled={page === totalPages - 1}
+              className="p-2 rounded-lg bg-surface-container-highest text-on-surface-variant hover:text-on-surface transition-colors disabled:opacity-40"
+            >
+              <ChevronRightIcon className="w-5 h-5" />
+            </button>
           </div>
-          <button className="p-2 rounded-lg bg-surface-container-highest text-on-surface-variant hover:text-on-surface transition-colors">
-            <ChevronRightIcon className="w-5 h-5" />
-          </button>
-        </div>
+        )}
       </section>
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-surface-container-high rounded-2xl p-6 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-primary/10 transition-colors"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-primary/10 transition-colors" />
           <h4 className="text-lg font-headline font-bold text-on-surface mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-tertiary" />
             Tendência de Volume
           </h4>
           <div className="h-40 w-full bg-surface-container flex items-end justify-between p-4 rounded-xl gap-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data}>
-                <Bar dataKey="value" radius={[2, 2, 0, 0]}>
-                  {data.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={index === data.length - 1 ? '#44ddc1' : '#bbc3ff'} 
-                      fillOpacity={index === data.length - 1 ? 1 : 0.4}
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            {chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <Bar dataKey="value" radius={[2, 2, 0, 0]}>
+                    {chartData.map((_, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={index === chartData.length - 1 ? '#44ddc1' : '#bbc3ff'}
+                        fillOpacity={index === chartData.length - 1 ? 1 : 0.4}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-sm text-on-surface-variant">
+                Nenhum dado ainda
+              </div>
+            )}
           </div>
           <p className="text-xs text-on-surface-variant mt-4">
-            As pesquisas aumentaram <span className="text-tertiary font-bold">12%</span> em relação à semana passada.
+            Baseado nas últimas {Math.min(8, chartData.length)} buscas realizadas.
           </p>
         </div>
 
@@ -183,10 +265,12 @@ export const Dashboard: React.FC = () => {
           <div>
             <h4 className="text-lg font-headline font-bold text-on-surface mb-2 flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-primary" />
-              Buscas Inteligentes
+              Resumo
             </h4>
             <p className="text-sm text-on-surface-variant">
-              Sua análise mais frequente é no setor de <strong>Varejo Alimentar</strong> com raio médio de <strong>3km</strong>.
+              {totalBuscas > 0
+                ? `Você já realizou ${totalBuscas} ${totalBuscas === 1 ? 'busca' : 'buscas'} cobrindo ${cepsUnicos} ${cepsUnicos === 1 ? 'CEP único' : 'CEPs únicos'}, com média de ${mediaLeads} leads por varredura.`
+                : 'Nenhuma busca realizada ainda. Vá para Explorar e inicie sua primeira varredura.'}
             </p>
           </div>
           <div className="mt-6 flex gap-3">
