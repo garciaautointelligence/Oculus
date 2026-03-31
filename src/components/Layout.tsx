@@ -45,7 +45,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
             className={cn(
               "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group",
               activeTab === item.id 
-                ? "bg-surface-container-high text-primary border-l-4 border-primary" 
+                ? "bg-surface-container-high text-tertiary border-l-4 border-tertiary" 
                 : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
             )}
           >
@@ -56,7 +56,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
       </nav>
 
       <div className="p-4 mt-auto space-y-4">
-        <button className="w-full bg-gradient-to-r from-primary to-inverse-primary text-on-primary font-bold py-3 rounded-md flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-primary/10">
+        <button className="w-full bg-gradient-to-r from-tertiary to-primary text-on-primary font-bold py-3 rounded-md flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-xl shadow-tertiary/30">
           <PlusCircle className="w-4 h-4" />
           <span className="text-sm">Nova Análise</span>
         </button>

@@ -52,12 +52,12 @@ export const MarketExploration: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] max-w-4xl mx-auto w-full space-y-12 p-6 card-soft gradient-panel">
       <div className="text-center space-y-4">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs font-bold uppercase tracking-widest">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary/15 border border-tertiary/30 text-tertiary text-xs font-bold uppercase tracking-widest">
           <Compass className="w-3 h-3" />
           Inteligência de Mercado
         </div>
         <h1 className="text-6xl font-headline font-black text-on-surface tracking-tighter leading-none">
-          Explore Novas <span className="text-primary">Oportunidades</span>
+          Explore Novas <span className="text-tertiary">Oportunidades</span>
         </h1>
         <p className="text-on-surface-variant text-lg max-w-xl mx-auto">
           Insira um CEP para iniciar uma varredura profunda de densidade comercial e presença digital na região.
@@ -94,7 +94,7 @@ export const MarketExploration: React.FC = () => {
         <button
           onClick={handleRunScan}
           disabled={loading}
-          className="bg-primary text-on-primary font-black px-8 py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-inverse-primary transition-all group disabled:opacity-60 disabled:cursor-not-allowed"
+          className="bg-tertiary text-on-tertiary font-black px-8 py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-tertiary/90 transition-all group disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {loading ? 'Processando...' : 'INICIAR SCAN'}
           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -103,7 +103,7 @@ export const MarketExploration: React.FC = () => {
 
       {/* Status do processo */}
       {statusMsg && (
-        <div className="w-full flex items-center gap-3 bg-primary/5 border border-primary/15 rounded-xl px-5 py-4 text-sm text-primary">
+        <div className="w-full flex items-center gap-3 bg-tertiary/12 border border-tertiary/25 rounded-xl px-5 py-4 text-sm text-tertiary">
           <Zap className="w-4 h-4 animate-pulse shrink-0" />
           {statusMsg}
         </div>
@@ -171,7 +171,7 @@ export const MarketExploration: React.FC = () => {
                       </td>
                       <td className="px-5 py-4 text-on-surface-variant">
                         {lead.site
-                          ? <a href={lead.site} target="_blank" rel="noreferrer" className="text-primary underline underline-offset-2">{lead.site}</a>
+                          ? <a href={lead.site} target="_blank" rel="noreferrer" className="text-tertiary underline underline-offset-2">{lead.site}</a>
                           : '—'}
                       </td>
                     </tr>
@@ -183,17 +183,17 @@ export const MarketExploration: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-          <div className="bg-surface-container-high p-6 rounded-2xl border border-outline-variant/5 hover:border-primary/20 transition-colors">
+          <div className="bg-surface-container-high p-6 rounded-2xl border border-outline-variant/5 hover:border-tertiary/30 transition-colors">
             <TrendingUp className="w-8 h-8 text-tertiary mb-4" />
             <h4 className="font-headline font-bold text-lg mb-2">Análise de Densidade</h4>
             <p className="text-sm text-on-surface-variant">Identifique saturação de mercado e nichos inexplorados com precisão geoespacial.</p>
           </div>
-          <div className="bg-surface-container-high p-6 rounded-2xl border border-outline-variant/5 hover:border-primary/20 transition-colors">
-            <Users className="w-8 h-8 text-primary mb-4" />
+          <div className="bg-surface-container-high p-6 rounded-2xl border border-outline-variant/5 hover:border-tertiary/30 transition-colors">
+            <Users className="w-8 h-8 text-tertiary mb-4" />
             <h4 className="font-headline font-bold text-lg mb-2">Perfil de Público</h4>
             <p className="text-sm text-on-surface-variant">Entenda o comportamento e as expectativas digitais dos consumidores locais.</p>
           </div>
-          <div className="bg-surface-container-high p-6 rounded-2xl border border-outline-variant/5 hover:border-primary/20 transition-colors">
+          <div className="bg-surface-container-high p-6 rounded-2xl border border-outline-variant/5 hover:border-tertiary/30 transition-colors">
             <Building2 className="w-8 h-8 text-secondary mb-4" />
             <h4 className="font-headline font-bold text-lg mb-2">Benchmarking Digital</h4>
             <p className="text-sm text-on-surface-variant">Compare a performance online de todos os concorrentes em um raio definido.</p>
