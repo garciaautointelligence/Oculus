@@ -248,10 +248,10 @@ export const MarketExploration: React.FC = () => {
           // Tentar buscar leads existentes
           const result = await buscarLeadsPorCep(cepLimpo, '1.0', 1, 1);
           if (result.leads && result.leads.length > 0) {
-            // Há leads disponíveis, mostrar como verificado
+            // Há leads disponíveis, mostrar "Carregado" verde e liberar botão
             setResultado({ leads: result.leads, fromCache: true });
             setLoading(false);
-            setStatusMsg('Verificado');
+            setStatusMsg('Carregado');
             setError(null);
             setActiveTab('scaneados');
             return;

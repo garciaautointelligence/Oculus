@@ -1,3 +1,11 @@
+
+# vamos fazer assim 
+na hora que o cep scaneado apareceu nos scaneados o status fica "Carregado" verde 
+e o botao de iniciar scan liberado
+pronto para scanear outro 
+
+
+
 # Oculus Roadmap
 
 ## O que foi feito
