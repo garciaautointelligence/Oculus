@@ -178,16 +178,21 @@ export const MarketExploration: React.FC = () => {
     // Mostrar "Busca pendente..." por 20 segundos
     setStatusMsg('Busca pendente...');
     
-    // Após 20 segundos, mudar para "Carregado" em verde por 2 segundos
+    // Após 20 segundos, remover "busca pendente" e mostrar "Carregado" verde neon
     setTimeout(() => {
-      setStatusMsg('Carregado');
+      setStatusMsg(null); // Remove "busca pendente"
       
-      // Após 2 segundos, remover a mensagem
+      // Mostrar "Carregado" verde neon
       setTimeout(() => {
-        setStatusMsg(null);
-        setLoading(false);
-        setActiveTab('scaneados');
-      }, 2000);
+        setStatusMsg('Carregado');
+        
+        // Após mais 30 segundos (total 50s), liberar o botão
+        setTimeout(() => {
+          setStatusMsg(null);
+          setLoading(false);
+          setActiveTab('scaneados');
+        }, 30000);
+      }, 100); // Pequeno delay para transição suave
     }, 20000);
   };
 
@@ -495,12 +500,14 @@ export const MarketExploration: React.FC = () => {
           {/* Status Messages */}
           {statusMsg && (
             <div className={`w-full max-w-2xl flex items-center gap-3 rounded-xl px-5 py-4 text-sm ${
-              statusMsg === 'Verificado' || statusMsg === 'Carregado'
+              statusMsg === 'Verificado' 
                 ? 'bg-green-500/15 border border-green-500/25 text-green-600' 
+                : statusMsg === 'Carregado'
+                ? 'bg-green-400/20 border border-green-400/40 text-green-400 shadow-lg shadow-green-400/20'
                 : 'bg-tertiary/12 border border-tertiary/25 text-tertiary'
             }`}>
               <Zap className={`w-4 h-4 shrink-0 ${
-                statusMsg === 'Verificado' || statusMsg === 'Carregado' ? 'text-green-600' : 'animate-pulse'
+                statusMsg === 'Verificado' || statusMsg === 'Carregado' ? 'text-green-400' : 'animate-pulse'
               }`} />
               {statusMsg}
             </div>
