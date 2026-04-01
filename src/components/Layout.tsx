@@ -18,9 +18,10 @@ import { cn } from '../lib/utils';
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  onNewAnalysis: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onNewAnalysis }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Painel', icon: LayoutDashboard },
     { id: 'explore', label: 'Explorar Mercado', icon: Search },
@@ -56,9 +57,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
       </nav>
 
       <div className="p-4 mt-auto space-y-4">
-        <button className="w-full bg-gradient-to-r from-tertiary to-primary text-on-primary font-bold py-3 rounded-md flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-xl shadow-tertiary/30">
+        <button
+          onClick={onNewAnalysis}
+          className="w-full bg-gradient-to-r from-tertiary via-yellow-300 to-primary text-black drop-shadow-xl font-bold py-3 rounded-md flex items-center justify-center gap-2 hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 shadow-xl shadow-tertiary/30 transition-all"
+          aria-label="Iniciar nova análise"
+        >
           <PlusCircle className="w-4 h-4" />
-          <span className="text-sm">Nova Análise</span>
+          <span className="text-sm tracking-wide leading-tight">Nova Análise</span>
         </button>
 
         <div className="pt-4 border-t border-outline-variant/10 space-y-1">

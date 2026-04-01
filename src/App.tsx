@@ -23,9 +23,14 @@ export default function App() {
     localStorage.setItem('oculus-theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
 
+  const handleNewAnalysis = () => {
+    // UX: Nova Análise deve levar ao painel de exploração por padrão
+    setActiveTab('explore');
+  };
+
   return (
     <div className="flex min-h-screen bg-surface text-on-surface">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onNewAnalysis={handleNewAnalysis} />
       
       <main className="ml-64 flex-1 flex flex-col min-h-screen">
         <TopBar darkMode={darkMode} onThemeToggle={() => setDarkMode((current) => !current)} />
