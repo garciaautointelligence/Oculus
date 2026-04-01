@@ -222,17 +222,49 @@ async function criarBusca(cep, raioKm) {
 }
 
 // ------------------------------------------------------------
-// Busca os leads de uma search (já salvos pelo n8n)
+// Busca leads por CEP e raio (join entre searches e leads)
 // ------------------------------------------------------------
-async function buscarLeadsPorSearch(searchId) {
-  const { data, error } = await supabase
-    .from('leads')
-    .select('*')
-    .eq('search_id', searchId)
-    .order('score', { ascending: false });
+export async function buscarLeadsPorCep(cep, raioKm, page = 1, limit = 9) {
+  // Primeiro encontra o search_id
+  const { data: searchData, error: searchError } = await supabase
+    .from('searches')
+    .select('id')
+    .eq('cep', cep)
+    .eq('raio_km', raioKm)
+    .eq('status', 'done')
+    .order('created_at', { ascending: false })
+    .limit(1);
 
-  if (error) throw new Error(`Erro ao buscar leads: ${error.message}`);
-  return data ?? [];
+  if (searchError) throw new Error(`Erro ao buscar search: ${searchError.message}`);
+  if (!searchData || searchData.length === 0) {
+    return { leads: [], total: 0, hasMore: false };
+  }
+
+  const searchId = searchData[0].id;
+
+  // Busca leads com paginação
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  const { data: leadsData, error: leadsError, count } = await supabase
+    .from('leads')
+    .select('*', { count: 'exact' })
+    .eq('search_id', searchId)
+    .order('score', { ascending: false })
+    .range(from, to);
+
+  if (leadsError) throw new Error(`Erro ao buscar leads: ${leadsError.message}`);
+
+  const total = count || 0;
+  const hasMore = total > (page * limit);
+
+  return { 
+    leads: leadsData ?? [], 
+    total, 
+    hasMore,
+    currentPage: page,
+    totalPages: Math.ceil(total / limit)
+  };
 }
 
 // ------------------------------------------------------------

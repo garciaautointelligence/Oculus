@@ -9,6 +9,9 @@ export default defineConfig(({mode}) => {
     plugins: [react(), tailwindcss()],
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+      'process.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL),
+      'process.env.VITE_SUPABASE_KEY': JSON.stringify(env.VITE_SUPABASE_KEY),
+      'process.env.VITE_N8N_WEBHOOK': JSON.stringify(env.VITE_N8N_WEBHOOK),
     },
     resolve: {
       alias: {
@@ -16,7 +19,6 @@ export default defineConfig(({mode}) => {
       },
     },
     server: {
-      // HMR pode ser controlado por DISABLE_HMR quando necessário.
       hmr: process.env.DISABLE_HMR !== 'true',
     },
   };

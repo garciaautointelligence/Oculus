@@ -32,6 +32,15 @@ export const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
 
+  const handleReloadSearch = (search: Search, forceReload: boolean = false) => {
+    sessionStorage.setItem('reload_search', JSON.stringify({
+      cep: search.cep,
+      radius: search.raio_km.toString(),
+      forceReload
+    }));
+    alert(`Busca preparada para ${forceReload ? 'atualizar' : 'recarregar'}. Vá para a aba "Explorar Mercado" para visualizar.`);
+  };
+
   useEffect(() => {
     buscarHistorico(50)
       .then(setSearches)
@@ -179,8 +188,19 @@ export const Dashboard: React.FC = () => {
                       </td>
                       <td className="px-6 py-5 text-right">
                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="p-2 bg-primary/10 text-primary hover:bg-primary hover:text-on-primary rounded-lg transition-all">
+                          <button 
+                            onClick={() => handleReloadSearch(row, false)}
+                            className="p-2 bg-primary/10 text-primary hover:bg-primary hover:text-on-primary rounded-lg transition-all"
+                            title="Recarregar busca (usar cache)"
+                          >
                             <ExternalLink className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleReloadSearch(row, true)}
+                            className="p-2 bg-tertiary/10 text-tertiary hover:bg-tertiary hover:text-on-tertiary rounded-lg transition-all"
+                            title="Atualizar base (forçar recarga)"
+                          >
+                            <TrendingUp className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
