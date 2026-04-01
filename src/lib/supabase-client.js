@@ -17,18 +17,32 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // onStatus(msg) — callback opcional para mostrar progresso na UI
 // Retorna { search, leads, fromCache }
 // ------------------------------------------------------------
-export async function buscarLeads(cep, raioKm, onStatus) {
+export async function buscarLeads(cep, raioKm, onStatus, options = { forceReload: false }) {
   const raio = parseFloat(raioKm);
   const status = (msg) => onStatus?.(msg);
+  const { forceReload } = options;
 
   // 1. Verifica cache — CEP + raio já processados antes?
   status('Verificando cache...');
   const cached = await buscarNoCache(cep, raio);
 
-  if (cached?.status === 'done') {
-    status('Dados encontrados no cache!');
-    const leads = await buscarLeadsPorSearch(cached.id);
-    return { search: cached, leads, fromCache: true };
+  if (cached && !forceReload) {
+    if (cached.status === 'done') {
+      status('Dados encontrados no cache!');
+      const leads = await buscarLeadsPorSearch(cached.id);
+      return { search: cached, leads, fromCache: true };
+    }
+
+    if (cached.status === 'pending' || cached.status === 'processing') {
+      status('Busca anterior em andamento, aguardando conclusão...');
+      const searchFinalizada = await aguardarConclusao(cached.id, status);
+      const leads = await buscarLeadsPorSearch(cached.id);
+      return { search: searchFinalizada, leads, fromCache: true };
+    }
+
+    if (cached.status === 'error') {
+      status('Busca anterior falhou, iniciando nova busca...');
+    }
   }
 
   // 2. Cria registro com status "pending" e dispara n8n
@@ -56,10 +70,66 @@ export async function buscarLeads(cep, raioKm, onStatus) {
 // ------------------------------------------------------------
 function aguardarConclusao(searchId, onStatus) {
   return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      supabase.removeChannel(channel);
-      reject(new Error('Timeout: o n8n demorou mais de 90 segundos.'));
-    }, 90_000);
+    let finished = false;
+
+    const cleanup = () => {
+      clearTimeout(timeout);
+      clearInterval(poll);
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+
+    const tryResolve = async () => {
+      const { data, error } = await supabase
+        .from('searches')
+        .select('*')
+        .eq('id', searchId)
+        .single();
+
+      if (error) {
+        return;
+      }
+
+      if (!data) {
+        return;
+      }
+
+      const { status } = data;
+
+      const normalizedStatus = String(status ?? '').toLowerCase();
+
+      if (normalizedStatus === 'pending') {
+        onStatus?.('Busca pendente...');
+      }
+
+      if (normalizedStatus === 'processing' || normalizedStatus === 'in_progress') {
+        onStatus?.('Processando dados...');
+      }
+
+      if (normalizedStatus === 'done' || normalizedStatus === 'completed' || normalizedStatus === 'success') {
+        finished = true;
+        cleanup();
+        resolve(data);
+      }
+
+      if (normalizedStatus === 'error' || normalizedStatus === 'failed') {
+        finished = true;
+        cleanup();
+        reject(new Error('O n8n reportou um erro ao processar.'));
+      }
+    };
+
+    const timeout = setTimeout(async () => {
+      if (finished) return;
+
+      await tryResolve();
+
+      if (!finished) {
+        cleanup();
+        reject(new Error('Timeout: o n8n demorou mais de 180 segundos.'));
+      }
+    }, 180_000); // 180s para permitir latência de n8n mais alta
 
     const channel = supabase
       .channel('search-' + searchId)
@@ -71,7 +141,9 @@ function aguardarConclusao(searchId, onStatus) {
           table: 'searches',
           filter: `id=eq.${searchId}`,
         },
-        (payload) => {
+        async (payload) => {
+          if (finished) return;
+
           const { status } = payload.new;
 
           if (status === 'processing') {
@@ -79,19 +151,27 @@ function aguardarConclusao(searchId, onStatus) {
           }
 
           if (status === 'done') {
-            clearTimeout(timeout);
-            supabase.removeChannel(channel);
+            finished = true;
+            cleanup();
             resolve(payload.new);
           }
 
           if (status === 'error') {
-            clearTimeout(timeout);
-            supabase.removeChannel(channel);
+            finished = true;
+            cleanup();
             reject(new Error('O n8n reportou um erro ao processar.'));
           }
         }
       )
       .subscribe();
+
+    const poll = setInterval(async () => {
+      if (finished) return;
+      await tryResolve();
+    }, 5000);
+
+    // Checagem inicial caso n8n já tenha terminado antes da inscrição real-time
+    tryResolve();
   });
 }
 
@@ -121,6 +201,10 @@ async function buscarNoCache(cep, raioKm) {
     .limit(1);
 
   return data?.[0] ?? null;
+}
+
+export async function verificarCache(cep, raioKm) {
+  return buscarNoCache(cep, raioKm);
 }
 
 // ------------------------------------------------------------

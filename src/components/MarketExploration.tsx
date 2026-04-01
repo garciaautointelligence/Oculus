@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   MapPin, 
   Compass, 
@@ -10,7 +10,9 @@ import {
   Database,
   Zap
 } from 'lucide-react';
-import { buscarLeads } from '../lib/supabase-client'; // ← ajuste o path se necessário
+import { buscarLeads, verificarCache } from '../lib/supabase-client'; // ← ajuste o path se necessário
+
+const STORAGE_KEY = 'oculus-market-exploration-state';
 
 export const MarketExploration: React.FC = () => {
   const [cep, setCep] = useState('');
@@ -20,7 +22,43 @@ export const MarketExploration: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [resultado, setResultado] = useState<{ leads: any[]; fromCache: boolean } | null>(null);
 
-  const handleRunScan = async () => {
+  useEffect(() => {
+    const saved = sessionStorage.getItem(STORAGE_KEY);
+    if (!saved) return;
+
+    try {
+      const state = JSON.parse(saved);
+      if (state.cep) setCep(state.cep);
+      if (state.radius) setRadius(state.radius);
+      if (typeof state.loading === 'boolean') setLoading(state.loading);
+      if (typeof state.statusMsg === 'string') setStatusMsg(state.statusMsg);
+      if (typeof state.error === 'string') setError(state.error);
+      if (state.resultado) setResultado(state.resultado);
+
+      if (state.loading && state.cep && state.radius) {
+        (async () => {
+          const cached = await verificarCache(state.cep, state.radius);
+          if (cached?.status === 'done') {
+            const { leads } = await buscarLeads(state.cep, state.radius, (msg) => setStatusMsg(msg), { forceReload: false });
+            setResultado({ leads, fromCache: true });
+            setLoading(false);
+            setStatusMsg(null);
+          }
+        })();
+      }
+    } catch {
+      // ignorar se estado inválido
+    }
+  }, []);
+
+  useEffect(() => {
+    sessionStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ cep, radius, loading, statusMsg, error, resultado })
+    );
+  }, [cep, radius, loading, statusMsg, error, resultado]);
+
+  const handleRunScan = async (forceReload = false) => {
     const cepLimpo = cep.replace(/\D/g, '');
     if (cepLimpo.length !== 8) {
       setError('Informe um CEP válido com 8 dígitos.');
@@ -30,13 +68,35 @@ export const MarketExploration: React.FC = () => {
     setError(null);
     setLoading(true);
     setResultado(null);
-    setStatusMsg(null);
+    setStatusMsg('Verificando cache...');
 
     try {
+      const cached = await verificarCache(cepLimpo, radius);
+
+      if (cached?.status === 'done' && !forceReload) {
+        const userChoice = window.confirm(
+          'Já existe resultado para este CEP e raio. Deseja atualizar a base? Clique OK para atualizar, Cancelar para usar cache.'
+        );
+
+        if (!userChoice) {
+          const { leads, fromCache } = await buscarLeads(
+            cepLimpo,
+            radius,
+            (msg) => setStatusMsg(msg),
+            { forceReload: false }
+          );
+          setResultado({ leads, fromCache });
+          setLoading(false);
+          setStatusMsg(null);
+          return;
+        }
+      }
+
       const { leads, fromCache } = await buscarLeads(
         cepLimpo,
         radius,
-        (msg) => setStatusMsg(msg)
+        (msg) => setStatusMsg(msg),
+        { forceReload: true }
       );
 
       setResultado({ leads, fromCache });
@@ -132,6 +192,14 @@ export const MarketExploration: React.FC = () => {
                 ? 'Resultado recuperado do cache — nenhuma chamada ao n8n foi necessária.'
                 : `${resultado.leads.length} leads encontrados e salvos no banco.`}
             </span>
+            {resultado.fromCache && (
+              <button
+                onClick={() => handleRunScan(true)}
+                className="ml-auto rounded-lg bg-primary text-primary-foreground px-3 py-1 text-xs font-bold hover:bg-primary/90"
+              >
+                Atualizar CEP/Raio
+              </button>
+            )}
           </div>
 
           {resultado.leads.length === 0 ? (
