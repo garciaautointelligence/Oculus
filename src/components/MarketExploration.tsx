@@ -220,6 +220,18 @@ export const MarketExploration: React.FC = () => {
     }
   }, [activeTab]);
 
+  useEffect(() => {
+    if (statusMsg !== 'Análise enviada, aguardando resultado em segundo plano') {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setStatusMsg('Carregado');
+    }, 10000);
+
+    return () => clearTimeout(timer);
+  }, [statusMsg]);
+
   const handleRunScan = async (forceReload = false) => {
     const cepLimpo = cep.replace(/\D/g, '');
     if (cepLimpo.length !== 8) {
@@ -512,7 +524,7 @@ export const MarketExploration: React.FC = () => {
               statusMsg === 'Verificado' 
                 ? 'bg-green-500/15 border border-green-500/25 text-green-600' 
                 : statusMsg === 'Carregado'
-                ? 'bg-green-400/20 border border-green-400/40 text-green-400 shadow-lg shadow-green-400/20'
+                ? 'bg-lime-400/20 border border-lime-300/40 text-lime-300 shadow-lg shadow-lime-300/40'
                 : 'bg-tertiary/12 border border-tertiary/25 text-tertiary'
             }`}>
               <Zap className={`w-4 h-4 shrink-0 ${
