@@ -174,28 +174,6 @@ export const MarketExploration: React.FC = () => {
     await loadScannedCeps();
   };
 
-  const handlePendingStatusFlow = () => {
-    // Mostrar "Busca pendente..." por 20 segundos
-    setStatusMsg('Busca pendente...');
-    
-    // Após 20 segundos, remover "busca pendente" e mostrar "Carregado" verde neon
-    setTimeout(() => {
-      setStatusMsg(null); // Remove "busca pendente"
-      
-      // Mostrar "Carregado" verde neon
-      setTimeout(() => {
-        setStatusMsg('Carregado');
-        
-        // Após mais 30 segundos (total 50s), liberar o botão
-        setTimeout(() => {
-          setStatusMsg(null);
-          setLoading(false);
-          setActiveTab('scaneados');
-        }, 30000);
-      }, 100); // Pequeno delay para transição suave
-    }, 20000);
-  };
-
   const selectCep = async (cepData: ScannedCep, page = 1) => {
     setSelectedCep(cepData);
     setCurrentPage(page);
@@ -220,18 +198,6 @@ export const MarketExploration: React.FC = () => {
     }
   }, [activeTab]);
 
-  useEffect(() => {
-    if (statusMsg !== 'Análise enviada, aguardando resultado em segundo plano') {
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setStatusMsg('Carregamento concluído');
-    }, 10000);
-
-    return () => clearTimeout(timer);
-  }, [statusMsg]);
-
   const handleRunScan = async (forceReload = false) => {
     const cepLimpo = cep.replace(/\D/g, '');
     if (cepLimpo.length !== 8) {
@@ -254,13 +220,13 @@ export const MarketExploration: React.FC = () => {
     try {
       const cached = await verificarCache(cepLimpo, '1.0');
 
-      // Verificar se há leads disponíveis mesmo se o status não for 'done'
+      // Verificar se há leads no cache ou busca em andamento
       if (cached && !forceReload) {
-        try {
-          // Tentar buscar leads existentes
+        const status = String(cached.status ?? '').toLowerCase();
+
+        if (['done', 'carregado', 'loaded'].includes(status)) {
           const result = await buscarLeadsPorCep(cepLimpo, '1.0', 1, 1);
           if (result.leads && result.leads.length > 0) {
-            // Há leads disponíveis, mostrar "Carregado" verde e resetar para novo scan
             setResultado({ leads: result.leads, fromCache: true });
             setLoading(false);
             setStatusMsg('Carregado');
@@ -271,9 +237,23 @@ export const MarketExploration: React.FC = () => {
             setActiveTab('scan');
             return;
           }
-        } catch (err) {
-          // Se não conseguir buscar leads, mas há cache, mostrar fluxo de busca pendente
-          handlePendingStatusFlow();
+        }
+
+        if (status === 'pending' || status === 'processing') {
+          const { leads, fromCache } = await buscarLeads(
+            cepLimpo,
+            '1.0',
+            (msg) => setStatusMsg(msg),
+            { forceReload: false, waitForCompletion: false }
+          );
+
+          setResultado({ leads, fromCache });
+          setLoading(false);
+          setStatusMsg('Análise enviada, aguardando resultado em segundo plano');
+          await loadScannedCeps();
+          setCep('');
+          setResultado(null);
+          setActiveTab('scan');
           return;
         }
       }

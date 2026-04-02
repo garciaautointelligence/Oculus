@@ -19,6 +19,7 @@
 - Envio do payload para n8n com `search_id` e `idempotency_key`.
 - Detecção de conclusão via update em `searches.status` com realtime/poll.
 - Cache corretor por CEP+raio, priorizando o registro mais recente.
+- SavedSearches e HistoryPanel agora consomem histórico real do Supabase.
 - Reset do formulário para novo scan após envio assíncrono.
 
 ### Problemas críticos observados

@@ -1,32 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Clock3, TrendingUp, Activity, CheckCircle2 } from 'lucide-react';
+import { Clock3, Activity } from 'lucide-react';
+import { buscarHistorico } from '../lib/supabase-client';
 
-const historyItems = [
-  {
-    title: 'Auditoria de Presença Digital',
-    subtitle: 'CEP 04571-010 • 5 km',
-    status: 'Concluído',
-    date: '25 mar 2026',
-    impact: 'Aumento de 18% no recall de marca',
-  },
-  {
-    title: 'Análise de Força Local',
-    subtitle: 'CEP 01426-001 • 2.5 km',
-    status: 'Concluído',
-    date: '18 mar 2026',
-    impact: 'Identificadas 24 oportunidades em canais sociais',
-  },
-  {
-    title: 'Varredura de Novos Segmentos',
-    subtitle: 'CEP 30320-510 • 10 km',
-    status: 'Em andamento',
-    date: '11 mar 2026',
-    impact: 'Pipeline de leads atualizando em tempo real',
-  },
-];
+type HistoryItem = {
+  id: string;
+  cep: string;
+  raio_km: number;
+  status: string;
+  status_message?: string | null;
+  total_leads?: number;
+  created_at: string;
+  completed_at: string | null;
+};
 
 export const HistoryPanel: React.FC = () => {
+  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    buscarHistorico(10, [])
+      .then((data) => setHistoryItems(data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const formatDate = (iso: string) => {
+    const d = new Date(iso);
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+  };
+
   return (
     <div className="space-y-10 max-w-6xl mx-auto w-full">
       <section className="flex flex-col gap-4">
@@ -43,31 +46,56 @@ export const HistoryPanel: React.FC = () => {
       </section>
 
       <div className="grid grid-cols-1 gap-6">
-        {historyItems.map((item, index) => (
-          <motion.div
-            key={item.title}
-            initial={{ opacity: 0, x: -12 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.05 }}
-            className="bg-surface-container-high rounded-3xl p-6 border border-outline-variant/10"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-on-surface-variant font-bold">{item.subtitle}</p>
-                <h3 className="text-2xl font-bold text-on-surface mt-3">{item.title}</h3>
+        {loading ? (
+          Array.from({ length: 4 }).map((_, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
+              className="bg-surface-container-high rounded-3xl p-6 border border-outline-variant/10 animate-pulse"
+            >
+              <div className="h-6 bg-surface-container rounded-full mb-4" />
+              <div className="h-4 bg-surface-container rounded-full w-2/3 mb-6" />
+              <div className="h-3 bg-surface-container rounded-full w-full mb-3" />
+              <div className="h-3 bg-surface-container rounded-full w-5/6" />
+            </motion.div>
+          ))
+        ) : historyItems.length > 0 ? (
+          historyItems.map((item, index) => (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
+              className="bg-surface-container-high rounded-3xl p-6 border border-outline-variant/10"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.35em] text-on-surface-variant font-bold">CEP {item.cep} • {item.raio_km} km</p>
+                  <h3 className="text-2xl font-bold text-on-surface mt-3">{item.id.slice(0, 10)}</h3>
+                </div>
+                <div className="rounded-full bg-surface-container-highest px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-tertiary">
+                  {item.status || 'Sem status'}
+                </div>
               </div>
-              <div className="rounded-full bg-surface-container-highest px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-tertiary">{item.status}</div>
-            </div>
 
-            <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-2 text-on-surface-variant text-sm">
-                <Clock3 className="w-4 h-4" />
-                {item.date}
+              <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2 text-on-surface-variant text-sm">
+                  <Clock3 className="w-4 h-4" />
+                  {formatDate(item.created_at)}
+                </div>
+                <div className="text-sm text-on-surface">
+                  {item.status_message || `${item.total_leads ?? 0} leads encontrados`}
+                </div>
               </div>
-              <div className="text-sm text-on-surface">{item.impact}</div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          ))
+        ) : (
+          <div className="p-8 rounded-3xl bg-surface-container border border-dashed border-outline-variant/40 text-on-surface-variant text-center">
+            Nenhum histórico encontrado. Faça uma nova análise para preencher este painel.
+          </div>
+        )}
       </div>
 
       <div className="bg-surface-container rounded-3xl p-8 border border-outline-variant/10 flex flex-col md:flex-row items-center justify-between gap-6">

@@ -12,6 +12,98 @@ const N8N_WEBHOOK  = import.meta.env.VITE_N8N_WEBHOOK;
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+const FINAL_STATUSES = ['done', 'carregado', 'loaded'];
+const ERROR_STATUS = 'error';
+
+function normalizeStatus(value) {
+  return String(value ?? '').toLowerCase();
+}
+
+function getStatusMessage(search) {
+  return search?.status_message || search?.message || null;
+}
+
+function handleSearchStatus(search, onStatus) {
+  const status = normalizeStatus(search?.status);
+  const message = getStatusMessage(search);
+
+  if (message) {
+    onStatus?.(message);
+    return;
+  }
+
+  if (status === 'pending') onStatus?.('Busca pendente...');
+  if (status === 'processing') onStatus?.('Processando dados...');
+  if (status === 'carregado' || status === 'loaded') onStatus?.('Carregado');
+  if (status === 'done') onStatus?.('Concluído!');
+}
+
+async function fetchSearch(searchId) {
+  const { data, error } = await supabase
+    .from('searches')
+    .select('*')
+    .eq('id', searchId)
+    .single();
+
+  if (error) return null;
+  return data;
+}
+
+function monitorSearchStatus(searchId, onStatus) {
+  let finished = false;
+  const cleanup = () => {
+    clearTimeout(timeout);
+    clearInterval(poll);
+    if (channel) supabase.removeChannel(channel);
+  };
+
+  const tryStatus = async () => {
+    const data = await fetchSearch(searchId);
+    if (!data || finished) return;
+
+    const status = normalizeStatus(data.status);
+    handleSearchStatus(data, onStatus);
+
+    if (FINAL_STATUSES.includes(status) || status === ERROR_STATUS) {
+      finished = true;
+      cleanup();
+    }
+  };
+
+  const channel = supabase
+    .channel(`search-monitor-${searchId}`)
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'searches', filter: `id=eq.${searchId}` },
+      (payload) => {
+        if (finished) return;
+        const data = payload.new;
+        const status = normalizeStatus(data.status);
+        handleSearchStatus(data, onStatus);
+        if (FINAL_STATUSES.includes(status) || status === ERROR_STATUS) {
+          finished = true;
+          cleanup();
+        }
+      }
+    )
+    .subscribe();
+
+  const poll = setInterval(() => {
+    if (finished) return;
+    tryStatus();
+  }, 5000);
+
+  const timeout = setTimeout(() => {
+    if (finished) return;
+    finished = true;
+    cleanup();
+  }, 180_000);
+
+  tryStatus();
+
+  return cleanup;
+}
+
 // ------------------------------------------------------------
 // Função principal
 // ------------------------------------------------------------
@@ -25,20 +117,26 @@ export async function buscarLeads(cep, raioKm, onStatus, options = { forceReload
   const cached = await buscarNoCache(cep, raio);
 
   if (cached && !forceReload) {
-    if (cached.status === 'done') {
+    const normalizedCacheStatus = normalizeStatus(cached.status);
+
+    if (FINAL_STATUSES.includes(normalizedCacheStatus)) {
       status('Dados encontrados no cache!');
       const leads = await buscarLeadsPorSearch(cached.id);
       return { search: cached, leads, fromCache: true };
     }
 
-    if (cached.status === 'pending' || cached.status === 'processing') {
-      status('Busca anterior em andamento, aguardando conclusão...');
+    if (normalizedCacheStatus === 'pending' || normalizedCacheStatus === 'processing') {
+      status('Busca anterior em andamento, aguardando resultado...');
+      if (!waitForCompletion) {
+        monitorSearchStatus(cached.id, status);
+        return { search: cached, leads: [], fromCache: true };
+      }
       const searchFinalizada = await aguardarConclusao(cached.id, status);
       const leads = await buscarLeadsPorSearch(cached.id);
       return { search: searchFinalizada, leads, fromCache: true };
     }
 
-    if (cached.status === 'error') {
+    if (normalizedCacheStatus === ERROR_STATUS) {
       status('Busca anterior falhou, iniciando nova busca...');
     }
   }
@@ -52,6 +150,7 @@ export async function buscarLeads(cep, raioKm, onStatus, options = { forceReload
   if (payload?.message) status(payload.message);
 
   if (!waitForCompletion) {
+    monitorSearchStatus(search.id, status);
     return { search, leads: [], fromCache: false };
   }
 
@@ -68,7 +167,7 @@ export async function buscarLeads(cep, raioKm, onStatus, options = { forceReload
 }
 
 // ------------------------------------------------------------
-// Aguarda o n8n atualizar status para "done" via Realtime
+// Aguarda o n8n atualizar status via Realtime
 // ------------------------------------------------------------
 function aguardarConclusao(searchId, onStatus) {
   return new Promise((resolve, reject) => {
@@ -81,30 +180,22 @@ function aguardarConclusao(searchId, onStatus) {
     };
 
     const tryResolve = async () => {
-      const { data, error } = await supabase
-        .from('searches')
-        .select('*')
-        .eq('id', searchId)
-        .single();
+      const data = await fetchSearch(searchId);
+      if (!data || finished) return;
 
-      if (error || !data) return;
+      const normalizedStatus = normalizeStatus(data.status);
+      handleSearchStatus(data, onStatus);
 
-      const normalizedStatus = String(data.status ?? '').toLowerCase();
-
-      if (normalizedStatus === 'pending') onStatus?.('Busca pendente...');
-      if (normalizedStatus === 'processing') onStatus?.('Processando dados...');
-      if (normalizedStatus === 'carregado' || normalizedStatus === 'loaded') onStatus?.('Carregado');
-
-      if (['done', 'carregado', 'loaded'].includes(normalizedStatus)) {
+      if (FINAL_STATUSES.includes(normalizedStatus)) {
         finished = true;
         cleanup();
         resolve(data);
       }
 
-      if (normalizedStatus === 'error') {
+      if (normalizedStatus === ERROR_STATUS) {
         finished = true;
         cleanup();
-        reject(new Error('O n8n reportou um erro ao processar.'));
+        reject(new Error(getStatusMessage(data) || 'O n8n reportou um erro ao processar.'));
       }
     };
 
@@ -124,11 +215,19 @@ function aguardarConclusao(searchId, onStatus) {
         { event: 'UPDATE', schema: 'public', table: 'searches', filter: `id=eq.${searchId}` },
         async (payload) => {
           if (finished) return;
-          const { status } = payload.new;
-          if (status === 'processing') onStatus?.('Processando dados...');
-          if (status === 'carregado' || status === 'loaded') onStatus?.('Carregado');
-          if (['done', 'carregado', 'loaded'].includes(status)) { finished = true; cleanup(); resolve(payload.new); }
-          if (status === 'error') { finished = true; cleanup(); reject(new Error('O n8n reportou um erro ao processar.')); }
+          const data = payload.new;
+          const normalizedStatus = normalizeStatus(data.status);
+          handleSearchStatus(data, onStatus);
+          if (FINAL_STATUSES.includes(normalizedStatus)) {
+            finished = true;
+            cleanup();
+            resolve(data);
+          }
+          if (normalizedStatus === ERROR_STATUS) {
+            finished = true;
+            cleanup();
+            reject(new Error(getStatusMessage(data) || 'O n8n reportou um erro ao processar.'));
+          }
         }
       )
       .subscribe();
@@ -174,7 +273,10 @@ async function dispararN8N(cep, raioKm, search) {
 // Cria registro no Supabase com idempotency_key único
 // ------------------------------------------------------------
 async function criarBusca(cep, raioKm) {
-  const idempotency_key = crypto.randomUUID(); // nativo no browser, sem dependências
+  const idempotency_key =
+    typeof crypto?.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
   const { data, error } = await supabase
     .from('searches')
@@ -261,13 +363,18 @@ export async function buscarLeadsPorCep(cep, raioKm, page = 1, limit = 9) {
 // ------------------------------------------------------------
 // Histórico de buscas anteriores
 // ------------------------------------------------------------
-export async function buscarHistorico(limit = 10) {
-  const { data, error } = await supabase
+export async function buscarHistorico(limit = 10, statuses = ['done']) {
+  let query = supabase
     .from('searches')
     .select('*')
-    .eq('status', 'done')
     .order('created_at', { ascending: false })
     .limit(limit);
+
+  if (Array.isArray(statuses) && statuses.length > 0) {
+    query = query.in('status', statuses);
+  }
+
+  const { data, error } = await query;
 
   if (error) throw new Error(`Erro ao buscar histórico: ${error.message}`);
   return data ?? [];
