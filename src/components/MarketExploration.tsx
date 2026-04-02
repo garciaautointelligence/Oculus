@@ -276,7 +276,7 @@ export const MarketExploration: React.FC = () => {
             cepLimpo,
             '1.0',
             (msg) => setStatusMsg(msg),
-            { forceReload: false }
+            { forceReload: false, waitForCompletion: false }
           );
           setResultado({ leads, fromCache });
           setLoading(false);
@@ -294,12 +294,12 @@ export const MarketExploration: React.FC = () => {
         cepLimpo,
         '1.0',
         (msg) => setStatusMsg(msg),
-        { forceReload: true }
+        { forceReload: true, waitForCompletion: false }
       );
 
       setResultado({ leads, fromCache });
       setLoading(false);
-      setStatusMsg(null);
+      setStatusMsg('Análise enviada, aguardando resultado em segundo plano');
       await loadScannedCeps();
       setCep('');
       setResultado(null);

@@ -17,10 +17,10 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // onStatus(msg) — callback opcional para mostrar progresso na UI
 // Retorna { search, leads, fromCache }
 // ------------------------------------------------------------
-export async function buscarLeads(cep, raioKm, onStatus, options = { forceReload: false }) {
+export async function buscarLeads(cep, raioKm, onStatus, options = { forceReload: false, waitForCompletion: true }) {
   const raio = parseFloat(raioKm);
   const status = (msg) => onStatus?.(msg);
-  const { forceReload } = options;
+  const { forceReload, waitForCompletion = true } = options;
 
   // 1. Verifica cache — CEP + raio já processados antes?
   status('Verificando cache...');
@@ -53,6 +53,10 @@ export async function buscarLeads(cep, raioKm, onStatus, options = { forceReload
   status('Análise iniciada...');
   const payload = await dispararN8N(cep, raio, search.id);
   if (payload?.message) status(payload.message);
+
+  if (!waitForCompletion) {
+    return { search, leads: [], fromCache: false };
+  }
 
   // 3. Aguarda n8n terminar via Realtime
   status('Aguardando resultados...');
