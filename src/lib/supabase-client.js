@@ -49,9 +49,10 @@ export async function buscarLeads(cep, raioKm, onStatus, options = { forceReload
   status('Criando busca...');
   const search = await criarBusca(cep, raio);
 
-  // Fire-and-forget — n8n processa e salva tudo sozinho
+  // Dispara n8n e usa a mensagem de retorno para atualizar a UI imediatamente
   status('Análise iniciada...');
-  dispararN8N(cep, raio, search.id).catch(console.error);
+  const payload = await dispararN8N(cep, raio, search.id);
+  if (payload?.message) status(payload.message);
 
   // 3. Aguarda n8n terminar via Realtime
   status('Aguardando resultados...');
@@ -176,8 +177,7 @@ function aguardarConclusao(searchId, onStatus) {
 }
 
 // ------------------------------------------------------------
-// Dispara o webhook do n8n — sem esperar a resposta
-// O n8n salva tudo no Supabase por conta própria
+// Dispara o webhook do n8n e retorna o payload JSON
 // ------------------------------------------------------------
 async function dispararN8N(cep, raioKm, searchId) {
   const res = await fetch(N8N_WEBHOOK, {
@@ -186,7 +186,18 @@ async function dispararN8N(cep, raioKm, searchId) {
     body: JSON.stringify({ cep, raio: raioKm, search_id: searchId }),
   });
 
-  if (!res.ok) throw new Error(`n8n retornou erro: ${res.status}`);
+  const payload = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    const errorMessage = payload?.message || `n8n retornou erro: ${res.status}`;
+    throw new Error(errorMessage);
+  }
+
+  if (payload?.success === false) {
+    throw new Error(payload?.message || 'n8n retornou success=false');
+  }
+
+  return payload;
 }
 
 // ------------------------------------------------------------

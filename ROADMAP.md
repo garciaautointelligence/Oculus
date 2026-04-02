@@ -1,59 +1,64 @@
 
-# vamos fazer assim 
-na hora que o cep scaneado apareceu nos scaneados o status fica "Carregado" verde 
-e o botao de iniciar scan liberado
-pronto para scanear outro 
-
-
-
 # Oculus Roadmap
 
-## O que foi feito
+## Visão de Product Owner + Tech Lead
 
-- Refatoração da navegação principal com abas funcionais e transições suaves.
-- Implementado `framer-motion` para animações de entrada/saída entre telas.
-- Adicionado `dark mode` nativo com alternância na interface e tema CSS adaptativo.
-- Criadas telas completas para todas as abas principais:
-  - `Dashboard`
-  - `Explorar Mercado`
-  - `Auditoria Digital`
-  - `Motor de Automação`
-  - `Buscas Salvas`
-  - `Histórico`
-- Melhoria de experiência no `MarketExploration` com:
-  - estados de carregamento
-  - mensagens de erro
-  - estado vazio elegante
-- Adicionadas microinterações visuais, cards premium e espaçamento generoso para estética tech premium.
-- Atualizado `package.json` para usar `framer-motion` em vez de `motion`.
-- Adicionado suporte visual ao modo escuro via variáveis CSS.
+### O que está funcionando bem
 
-## Arquitetura implementada
+- Navegação de abas sólida e consistente entre as telas principais.
+- `dark mode` persistente funcionando com `localStorage`.
+- Animações suaves com `framer-motion` nas transições de páginas.
+- Dashboard com leitura de histórico do Supabase e visualização de métricas básicas.
+- Fluxo de `MarketExploration` com entrada de CEP, verificação de cache, leitura de resultados e estado de carregamento.
+- Integração com `viacep.com.br` para enriquecer CEPs com localização.
+- Lógica de busca de leads com Supabase (`buscarLeads`, `buscarLeadsPorCep`, `buscarHistorico`).
+- UI de `DigitalAudit`, `AutomationEngine`, `SavedSearches` e `HistoryPanel` com visual coerente e estrutura de conteúdo.
+- Utilitário `cn` com `clsx` + `tailwind-merge` mantém estilos Tailwind previsíveis.
 
-- Componentes isolados por responsabilidade:
-  - `Layout.tsx` controla `Sidebar` e `TopBar`
-  - `Dashboard.tsx`, `DigitalAudit.tsx`, `AutomationEngine.tsx`, `MarketExploration.tsx` representam telas principais
-  - `SavedSearches.tsx` e `History.tsx` trazem conteúdo ativo para abas secundárias
-- Utilitário `cn` em `src/lib/utils.ts` mantém classes Tailwind limpas e previsíveis.
+### O que precisa ser feito agora
 
-## Observações importantes
-
-- `MarketExploration` usa `src/components/supabase-client.js` para integração com Supabase e n8n.
-- É necessário configurar as variáveis de ambiente:
+- Converter `SavedSearches` e `HistoryPanel` de protótipos estáticos para dados reais.
+- Revisar se os dados de `DigitalAudit` e `AutomationEngine` devem ser dinâmicos ou se vão seguir como dashboards de visão.
+- Validar e documentar o setup obrigatório de variáveis de ambiente:
   - `VITE_SUPABASE_URL`
   - `VITE_SUPABASE_KEY`
   - `VITE_N8N_WEBHOOK`
-- O projeto ainda depende de instalar dependências locais após a mudança de `package.json`.
+- Garantir que o webhook n8n esteja disponível e que o timeout de 180s seja adequado.
+- Remover dependências não usadas do projeto (já identificado e limpo em `package.json`).
+- Adicionar tratamento de erro mais robusto para todos os fluxos de rede.
+- Implementar roteamento real (`React Router`) para permitir deep links e refresh sem perder o estado.
+- Criar uma camada de serviço / contexto para centralizar dados e evitar duplicação entre componentes.
+- Melhorar responsividade e layout mobile, especialmente para a sidebar e tabelas.
+- Adicionar testes unitários para componentes e integração de dados.
 
-## Próximos passos recomendados
+## Riscos técnicos e atenção imediata
 
-1. Integrar rotas reais com React Router ou outra solução de roteamento para navegação profunda.
-2. Criar um serviço de dados centralizado para histórico e buscas salvas.
-3. Adicionar autenticação e controle de conta do usuário.
-4. Melhorar a experiência mobile com menu colapsável e navegação por gestos.
-5. Implementar gráficos dinâmicos reais e dashboards conectados aos dados.
-6. Criar testes de UI e componentes (`vitest`, `testing-library`).
-7. Adicionar indicadores de performance / analytics para medição de retenção e uso.
-8. Polir acessibilidade: foco por teclado, contraste e labels ARIA.
-9. Evoluir o design system para tokens reutilizáveis e componente atômico.
-10. Incluir docs de desenvolvimento e branch de release para deploy contínuo.
+- `MarketExploration` depende de `buscarLeads` e do backend Supabase + n8n; se a infraestrutura falhar, a interface cai.
+- `SavedSearches` e `HistoryPanel` estão apenas com mock data, o produto parece funcional mas não está totalmente conectado.
+- O estado do CEP scan usa `sessionStorage` e fluxos distintos; precisamos validar o comportamento em vários cenários de uso.
+- A aplicação ainda não possui autenticação nem controle de usuário, o que limita o rollout em produção.
+
+## Backlog de funcionalidades estratégicas
+
+- Autenticação de usuário / permissões / multi-tenant.
+- Salvar buscas com CRUD real e abrir buscas salvas diretamente.
+- Agenda automática de varreduras e alertas por e-mail/WhatsApp.
+- Exportação de relatórios em PDF e CSV.
+- Integração com Google Business, Instagram, Facebook, Google Ads e outras fontes de dados.
+- Dashboard de regiões com mapa interativo e heatmap de oportunidades.
+- Score de presença digital por segmento e comparação com benchmarks.
+- Painel de configuração de conectores n8n e health checks automáticos.
+- Modo mobile-first com navegação adaptativa e PWA.
+- Assistente de recomendações inteligentes para ações de marketing.
+
+## Próximo ciclo de entregas (sprint imediato)
+
+1. Confirmar infra e env vars.
+2. Transformar `SavedSearches` e `HistoryPanel` em dados reais.
+3. Implementar roteamento com deep links.
+4. Adicionar testes básicos de UI e integração de dados.
+5. Documentar o setup de desenvolvimento no `README`.
+
+---
+
+> O produto já tem a base visual e a arquitetura de tela. Agora o foco deve ser estabilizar os dados reais, fechar a integração Supabase/n8n e transformar protótipos em funcionalidades operacionais.
