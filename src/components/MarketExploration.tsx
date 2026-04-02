@@ -248,12 +248,15 @@ export const MarketExploration: React.FC = () => {
           // Tentar buscar leads existentes
           const result = await buscarLeadsPorCep(cepLimpo, '1.0', 1, 1);
           if (result.leads && result.leads.length > 0) {
-            // Há leads disponíveis, mostrar "Carregado" verde e liberar botão
+            // Há leads disponíveis, mostrar "Carregado" verde e resetar para novo scan
             setResultado({ leads: result.leads, fromCache: true });
             setLoading(false);
             setStatusMsg('Carregado');
             setError(null);
-            setActiveTab('scaneados');
+            await loadScannedCeps();
+            setCep('');
+            setResultado(null);
+            setActiveTab('scan');
             return;
           }
         } catch (err) {
@@ -279,7 +282,10 @@ export const MarketExploration: React.FC = () => {
           setLoading(false);
           setStatusMsg('Verificado');
           setError(null);
-          setActiveTab('scaneados');
+          await loadScannedCeps();
+          setCep('');
+          setResultado(null);
+          setActiveTab('scan');
           return;
         }
       }
@@ -294,7 +300,10 @@ export const MarketExploration: React.FC = () => {
       setResultado({ leads, fromCache });
       setLoading(false);
       setStatusMsg(null);
-      setActiveTab('scaneados');
+      await loadScannedCeps();
+      setCep('');
+      setResultado(null);
+      setActiveTab('scan');
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setError(`Falha na varredura: ${msg}`);
