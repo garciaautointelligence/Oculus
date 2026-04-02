@@ -61,7 +61,8 @@ export async function buscarLeads(cep, raioKm, onStatus, options = { forceReload
 
   // 4. Busca os leads que o n8n salvou
   const leads = await buscarLeadsPorSearch(search.id);
-  status('Concluído!');
+  const finalStatus = String(searchFinalizada.status ?? '').toLowerCase();
+  status(finalStatus === 'carregado' || finalStatus === 'loaded' ? 'Carregado' : 'Concluído!');
 
   return { search: searchFinalizada, leads, fromCache: false };
 }
@@ -92,8 +93,9 @@ function aguardarConclusao(searchId, onStatus) {
 
       if (normalizedStatus === 'pending') onStatus?.('Busca pendente...');
       if (normalizedStatus === 'processing') onStatus?.('Processando dados...');
+      if (normalizedStatus === 'carregado' || normalizedStatus === 'loaded') onStatus?.('Carregado');
 
-      if (normalizedStatus === 'done') {
+      if (['done', 'carregado', 'loaded'].includes(normalizedStatus)) {
         finished = true;
         cleanup();
         resolve(data);
@@ -124,7 +126,8 @@ function aguardarConclusao(searchId, onStatus) {
           if (finished) return;
           const { status } = payload.new;
           if (status === 'processing') onStatus?.('Processando dados...');
-          if (status === 'done') { finished = true; cleanup(); resolve(payload.new); }
+          if (status === 'carregado' || status === 'loaded') onStatus?.('Carregado');
+          if (['done', 'carregado', 'loaded'].includes(status)) { finished = true; cleanup(); resolve(payload.new); }
           if (status === 'error') { finished = true; cleanup(); reject(new Error('O n8n reportou um erro ao processar.')); }
         }
       )
