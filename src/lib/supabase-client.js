@@ -1,28 +1,26 @@
 // ============================================================
 // supabase-client.js
 // Projeto Óculos — integração Supabase + n8n
-// Arquitetura: site cria a search → n8n processa e salva tudo
+// Arquitetura: frontend cria search → n8n só atualiza
 // ============================================================
 
 import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY; // anon key
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
 const N8N_WEBHOOK  = import.meta.env.VITE_N8N_WEBHOOK;
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ------------------------------------------------------------
-// Função principal — chame esta no frontend
-// onStatus(msg) — callback opcional para mostrar progresso na UI
-// Retorna { search, leads, fromCache }
+// Função principal
 // ------------------------------------------------------------
 export async function buscarLeads(cep, raioKm, onStatus, options = { forceReload: false, waitForCompletion: true }) {
   const raio = parseFloat(raioKm);
   const status = (msg) => onStatus?.(msg);
   const { forceReload, waitForCompletion = true } = options;
 
-  // 1. Verifica cache — CEP + raio já processados antes?
+  // 1. Verifica cache
   status('Verificando cache...');
   const cached = await buscarNoCache(cep, raio);
 
@@ -45,13 +43,12 @@ export async function buscarLeads(cep, raioKm, onStatus, options = { forceReload
     }
   }
 
-  // 2. Cria registro com status "pending" e dispara n8n
+  // 2. Frontend cria o registro com idempotency_key — n8n só atualiza
   status('Criando busca...');
   const search = await criarBusca(cep, raio);
 
-  // Dispara n8n e usa a mensagem de retorno para atualizar a UI imediatamente
   status('Análise iniciada...');
-  const payload = await dispararN8N(cep, raio, search.id);
+  const payload = await dispararN8N(cep, raio, search);
   if (payload?.message) status(payload.message);
 
   if (!waitForCompletion) {
@@ -71,7 +68,6 @@ export async function buscarLeads(cep, raioKm, onStatus, options = { forceReload
 
 // ------------------------------------------------------------
 // Aguarda o n8n atualizar status para "done" via Realtime
-// Timeout de 90s — rejeita a Promise se demorar demais
 // ------------------------------------------------------------
 function aguardarConclusao(searchId, onStatus) {
   return new Promise((resolve, reject) => {
@@ -80,9 +76,7 @@ function aguardarConclusao(searchId, onStatus) {
     const cleanup = () => {
       clearTimeout(timeout);
       clearInterval(poll);
-      if (channel) {
-        supabase.removeChannel(channel);
-      }
+      if (channel) supabase.removeChannel(channel);
     };
 
     const tryResolve = async () => {
@@ -92,33 +86,20 @@ function aguardarConclusao(searchId, onStatus) {
         .eq('id', searchId)
         .single();
 
-      if (error) {
-        return;
-      }
+      if (error || !data) return;
 
-      if (!data) {
-        return;
-      }
+      const normalizedStatus = String(data.status ?? '').toLowerCase();
 
-      const { status } = data;
+      if (normalizedStatus === 'pending') onStatus?.('Busca pendente...');
+      if (normalizedStatus === 'processing') onStatus?.('Processando dados...');
 
-      const normalizedStatus = String(status ?? '').toLowerCase();
-
-      if (normalizedStatus === 'pending') {
-        onStatus?.('Busca pendente...');
-      }
-
-      if (normalizedStatus === 'processing' || normalizedStatus === 'in_progress') {
-        onStatus?.('Processando dados...');
-      }
-
-      if (normalizedStatus === 'done' || normalizedStatus === 'completed' || normalizedStatus === 'success') {
+      if (normalizedStatus === 'done') {
         finished = true;
         cleanup();
         resolve(data);
       }
 
-      if (normalizedStatus === 'error' || normalizedStatus === 'failed') {
+      if (normalizedStatus === 'error') {
         finished = true;
         cleanup();
         reject(new Error('O n8n reportou um erro ao processar.'));
@@ -127,45 +108,24 @@ function aguardarConclusao(searchId, onStatus) {
 
     const timeout = setTimeout(async () => {
       if (finished) return;
-
       await tryResolve();
-
       if (!finished) {
         cleanup();
         reject(new Error('Timeout: o n8n demorou mais de 180 segundos.'));
       }
-    }, 180_000); // 180s para permitir latência de n8n mais alta
+    }, 180_000);
 
     const channel = supabase
       .channel('search-' + searchId)
       .on(
         'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'searches',
-          filter: `id=eq.${searchId}`,
-        },
+        { event: 'UPDATE', schema: 'public', table: 'searches', filter: `id=eq.${searchId}` },
         async (payload) => {
           if (finished) return;
-
           const { status } = payload.new;
-
-          if (status === 'processing') {
-            onStatus?.('Processando dados...');
-          }
-
-          if (status === 'done') {
-            finished = true;
-            cleanup();
-            resolve(payload.new);
-          }
-
-          if (status === 'error') {
-            finished = true;
-            cleanup();
-            reject(new Error('O n8n reportou um erro ao processar.'));
-          }
+          if (status === 'processing') onStatus?.('Processando dados...');
+          if (status === 'done') { finished = true; cleanup(); resolve(payload.new); }
+          if (status === 'error') { finished = true; cleanup(); reject(new Error('O n8n reportou um erro ao processar.')); }
         }
       )
       .subscribe();
@@ -175,26 +135,29 @@ function aguardarConclusao(searchId, onStatus) {
       await tryResolve();
     }, 5000);
 
-    // Checagem inicial caso n8n já tenha terminado antes da inscrição real-time
     tryResolve();
   });
 }
 
 // ------------------------------------------------------------
-// Dispara o webhook do n8n e retorna o payload JSON
+// Dispara o webhook — passa search completo (id + idempotency_key)
 // ------------------------------------------------------------
-async function dispararN8N(cep, raioKm, searchId) {
+async function dispararN8N(cep, raioKm, search) {
   const res = await fetch(N8N_WEBHOOK, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cep, raio: raioKm, search_id: searchId }),
+    body: JSON.stringify({
+      cep,
+      raio: raioKm,
+      search_id: search.id,
+      idempotency_key: search.idempotency_key,
+    }),
   });
 
   const payload = await res.json().catch(() => null);
 
   if (!res.ok) {
-    const errorMessage = payload?.message || `n8n retornou erro: ${res.status}`;
-    throw new Error(errorMessage);
+    throw new Error(payload?.message || `n8n retornou erro: ${res.status}`);
   }
 
   if (payload?.success === false) {
@@ -205,7 +168,23 @@ async function dispararN8N(cep, raioKm, searchId) {
 }
 
 // ------------------------------------------------------------
-// Verifica se CEP + raio já foram processados antes
+// Cria registro no Supabase com idempotency_key único
+// ------------------------------------------------------------
+async function criarBusca(cep, raioKm) {
+  const idempotency_key = crypto.randomUUID(); // nativo no browser, sem dependências
+
+  const { data, error } = await supabase
+    .from('searches')
+    .insert({ cep, raio_km: raioKm, status: 'pending', idempotency_key })
+    .select('*')
+    .single();
+
+  if (error) throw new Error(`Erro ao criar busca: ${error.message}`);
+  return data; // contém id + idempotency_key
+}
+
+// ------------------------------------------------------------
+// Verifica cache — CEP + raio já processados?
 // ------------------------------------------------------------
 async function buscarNoCache(cep, raioKm) {
   const { data } = await supabase
@@ -213,6 +192,7 @@ async function buscarNoCache(cep, raioKm) {
     .select('*')
     .eq('cep', cep)
     .eq('raio_km', raioKm)
+    .order('created_at', { ascending: false })
     .limit(1);
 
   return data?.[0] ?? null;
@@ -223,24 +203,23 @@ export async function verificarCache(cep, raioKm) {
 }
 
 // ------------------------------------------------------------
-// Cria registro de busca com status "pending"
+// Busca leads por search_id
 // ------------------------------------------------------------
-async function criarBusca(cep, raioKm) {
+async function buscarLeadsPorSearch(searchId) {
   const { data, error } = await supabase
-    .from('searches')
-    .insert({ cep, raio_km: raioKm, status: 'pending' })
+    .from('leads')
     .select('*')
-    .single();
+    .eq('search_id', searchId)
+    .order('score', { ascending: false });
 
-  if (error) throw new Error(`Erro ao criar busca: ${error.message}`);
-  return data;
+  if (error) throw new Error(`Erro ao buscar leads: ${error.message}`);
+  return data ?? [];
 }
 
 // ------------------------------------------------------------
-// Busca leads por CEP e raio (join entre searches e leads)
+// Busca leads por CEP e raio com paginação
 // ------------------------------------------------------------
 export async function buscarLeadsPorCep(cep, raioKm, page = 1, limit = 9) {
-  // Primeiro encontra o search_id
   const { data: searchData, error: searchError } = await supabase
     .from('searches')
     .select('id')
@@ -251,13 +230,9 @@ export async function buscarLeadsPorCep(cep, raioKm, page = 1, limit = 9) {
     .limit(1);
 
   if (searchError) throw new Error(`Erro ao buscar search: ${searchError.message}`);
-  if (!searchData || searchData.length === 0) {
-    return { leads: [], total: 0, hasMore: false };
-  }
+  if (!searchData || searchData.length === 0) return { leads: [], total: 0, hasMore: false };
 
   const searchId = searchData[0].id;
-
-  // Busca leads com paginação
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
@@ -271,19 +246,17 @@ export async function buscarLeadsPorCep(cep, raioKm, page = 1, limit = 9) {
   if (leadsError) throw new Error(`Erro ao buscar leads: ${leadsError.message}`);
 
   const total = count || 0;
-  const hasMore = total > (page * limit);
-
-  return { 
-    leads: leadsData ?? [], 
-    total, 
-    hasMore,
+  return {
+    leads: leadsData ?? [],
+    total,
+    hasMore: total > page * limit,
     currentPage: page,
-    totalPages: Math.ceil(total / limit)
+    totalPages: Math.ceil(total / limit),
   };
 }
 
 // ------------------------------------------------------------
-// Histórico de buscas anteriores (para o dashboard)
+// Histórico de buscas anteriores
 // ------------------------------------------------------------
 export async function buscarHistorico(limit = 10) {
   const { data, error } = await supabase
