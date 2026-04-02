@@ -226,7 +226,7 @@ export const MarketExploration: React.FC = () => {
     }
 
     const timer = setTimeout(() => {
-      setStatusMsg('Carregado');
+      setStatusMsg('Carregamento concluído');
     }, 10000);
 
     return () => clearTimeout(timer);

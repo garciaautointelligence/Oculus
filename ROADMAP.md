@@ -3,62 +3,67 @@
 
 ## Visão de Product Owner + Tech Lead
 
+### Situação atual
+
+- A estrutura de UI do projeto está montada: abas, layout, cards, formulários e animações estão consistentes.
+- `MarketExploration` funciona como fluxo de pesquisa: CEP → cache → criação de `search` → disparo n8n → leitura de status.
+- O backend já faz `criarBusca()` com `idempotency_key`, `dispararN8N()` envia `search_id + idempotency_key` e `aguardarConclusao()` monitora `searches` em tempo real.
+- `buscarNoCache()` já está ordenado por `created_at desc` para pegar o último scan.
+- `CEPs Scaneados` já carrega histórico e agrupa o CEP mais recente por endereço.
+- `DigitalAudit`, `AutomationEngine`, `SavedSearches` e `HistoryPanel` têm UI pronta, mas ainda não estão totalmente integrados ao fluxo de dados real.
+
 ### O que está funcionando bem
 
-- Navegação de abas sólida e consistente entre as telas principais.
-- `dark mode` persistente funcionando com `localStorage`.
-- Animações suaves com `framer-motion` nas transições de páginas.
-- Dashboard com leitura de histórico do Supabase e visualização de métricas básicas.
-- Fluxo de `MarketExploration` com entrada de CEP, verificação de cache, leitura de resultados e estado de carregamento.
-- Integração com `viacep.com.br` para enriquecer CEPs com localização.
-- Lógica de busca de leads com Supabase (`buscarLeads`, `buscarLeadsPorCep`, `buscarHistorico`).
-- UI de `DigitalAudit`, `AutomationEngine`, `SavedSearches` e `HistoryPanel` com visual coerente e estrutura de conteúdo.
-- Utilitário `cn` com `clsx` + `tailwind-merge` mantém estilos Tailwind previsíveis.
+- Entrada de CEP, validação básica e navegação entre `Novo Scan` e `CEPs Scaneados`.
+- Criação de registro de busca no Supabase com `status: pending` e `idempotency_key` nativo.
+- Envio do payload para n8n com `search_id` e `idempotency_key`.
+- Detecção de conclusão via update em `searches.status` com realtime/poll.
+- Cache corretor por CEP+raio, priorizando o registro mais recente.
+- Reset do formulário para novo scan após envio assíncrono.
+
+### Problemas críticos observados
+
+- O sistema não “vê que terminou” se o n8n não atualizar `searches.status` para um valor final (`done`, `carregado`, `loaded`).
+- `Respond to Webhook` sozinho não é suficiente; o backend depende da tabela `searches` para reconhecer o fim.
+- Existem fluxos de status no frontend que usam timers artificiais (`handlePendingStatusFlow`) e podem mascarar erros reais.
+- `SavedSearches` e `HistoryPanel` ainda não retornam dados reais do Supabase, então o produto está parcial.
+- Falta controle de usuário / autenticação e documentação clara do setup de ambiente.
+- A persistência em `sessionStorage` precisa ser revisada para não restaurar estado inválido após refresh.
 
 ### O que precisa ser feito agora
 
-- Converter `SavedSearches` e `HistoryPanel` de protótipos estáticos para dados reais.
-- Revisar se os dados de `DigitalAudit` e `AutomationEngine` devem ser dinâmicos ou se vão seguir como dashboards de visão.
-- Validar e documentar o setup obrigatório de variáveis de ambiente:
+- Garantir que o workflow n8n atualize corretamente `searches.status` e, se possível, armazene `status_message` ou `message`.
+- Remover lógica de espera artificial no frontend e basear o `statusMsg` em eventos reais de backend.
+- Validar o schema da tabela `searches` e confirmar que `idempotency_key` realmente existe e recebe valor.
+- Conectar `SavedSearches`, `HistoryPanel` e qualquer dashboard de auditoria ao Supabase/histórico real.
+- Documentar e testar o setup das variáveis de ambiente:
   - `VITE_SUPABASE_URL`
   - `VITE_SUPABASE_KEY`
   - `VITE_N8N_WEBHOOK`
-- Garantir que o webhook n8n esteja disponível e que o timeout de 180s seja adequado.
-- Remover dependências não usadas do projeto (já identificado e limpo em `package.json`).
-- Adicionar tratamento de erro mais robusto para todos os fluxos de rede.
-- Implementar roteamento real (`React Router`) para permitir deep links e refresh sem perder o estado.
-- Criar uma camada de serviço / contexto para centralizar dados e evitar duplicação entre componentes.
-- Melhorar responsividade e layout mobile, especialmente para a sidebar e tabelas.
-- Adicionar testes unitários para componentes e integração de dados.
+- Reinforçar o fluxo de scan para que o usuário veja claramente:
+  - scan enviado
+  - resultado carregado
+  - scan novo pronto para usar
 
-## Riscos técnicos e atenção imediata
+### Sprint imediato
 
-- `MarketExploration` depende de `buscarLeads` e do backend Supabase + n8n; se a infraestrutura falhar, a interface cai.
-- `SavedSearches` e `HistoryPanel` estão apenas com mock data, o produto parece funcional mas não está totalmente conectado.
-- O estado do CEP scan usa `sessionStorage` e fluxos distintos; precisamos validar o comportamento em vários cenários de uso.
-- A aplicação ainda não possui autenticação nem controle de usuário, o que limita o rollout em produção.
+1. Ajustar o workflow n8n para escrever o status final no registro `searches`.
+2. Normalizar os valores finais aceitos pelo frontend: `done`, `carregado`, `loaded`.
+3. Eliminar status temporários do frontend e usar somente `statusMsg` real do backend.
+4. Fazer `SavedSearches` e `HistoryPanel` consumirem dados reais do Supabase.
+5. Documentar o fluxo de scan no `README` e o que o ambiente precisa para rodar.
 
-## Backlog de funcionalidades estratégicas
+### Backlog de melhoria estratégica
 
-- Autenticação de usuário / permissões / multi-tenant.
-- Salvar buscas com CRUD real e abrir buscas salvas diretamente.
-- Agenda automática de varreduras e alertas por e-mail/WhatsApp.
-- Exportação de relatórios em PDF e CSV.
-- Integração com Google Business, Instagram, Facebook, Google Ads e outras fontes de dados.
-- Dashboard de regiões com mapa interativo e heatmap de oportunidades.
-- Score de presença digital por segmento e comparação com benchmarks.
-- Painel de configuração de conectores n8n e health checks automáticos.
-- Modo mobile-first com navegação adaptativa e PWA.
-- Assistente de recomendações inteligentes para ações de marketing.
-
-## Próximo ciclo de entregas (sprint imediato)
-
-1. Confirmar infra e env vars.
-2. Transformar `SavedSearches` e `HistoryPanel` em dados reais.
-3. Implementar roteamento com deep links.
-4. Adicionar testes básicos de UI e integração de dados.
-5. Documentar o setup de desenvolvimento no `README`.
+- Autenticação de usuário e multi-tenancy.
+- CRUD completo de buscas salvas e histórico de scans.
+- Agendamento de varreduras e notificações (e-mail/SMS/WhatsApp).
+- Exportação de relatórios em PDF/CSV.
+- Integrações com Google Business, Google Ads, Instagram e Facebook.
+- Dashboard de heatmap por região e score de presença digital.
+- Monitoramento de conectores n8n e health checks automáticos.
+- Versão mobile-first/PWA.
 
 ---
 
-> O produto já tem a base visual e a arquitetura de tela. Agora o foco deve ser estabilizar os dados reais, fechar a integração Supabase/n8n e transformar protótipos em funcionalidades operacionais.
+> O produto já tem a fundação certa. O próximo passo é deixar o fluxo de dados confiável: fixar a conclusão do n8n, eliminar esperas artificiais e fazer com que os componentes de histórico e buscas salvas sejam realmente operacionais.
