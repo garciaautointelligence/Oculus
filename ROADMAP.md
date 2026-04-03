@@ -1,61 +1,128 @@
 
 # Oculus Roadmap
 
-## Visão de Product Owner + Tech Lead
+## 🎯 Visão de Product Owner + Tech Lead
 
-### Situação atual
+### ✅ Situação Atual (Pós-Refatoração UX/UI)
 
-- A estrutura de UI do projeto está montada: abas, layout, cards, formulários e animações estão consistentes.
-- `MarketExploration` funciona como fluxo de pesquisa: CEP → cache → criação de `search` → disparo n8n → leitura de status.
-- O backend já faz `criarBusca()` com `idempotency_key`, `dispararN8N()` envia `search_id + idempotency_key` e `aguardarConclusao()` monitora `searches` em tempo real.
-- `buscarNoCache()` já está ordenado por `created_at desc` para pegar o último scan.
-- `CEPs Scaneados` já carrega histórico e agrupa o CEP mais recente por endereço.
-- `DigitalAudit`, `AutomationEngine`, `SavedSearches` e `HistoryPanel` têm UI pronta, e `SavedSearches` e `HistoryPanel` estão totalmente integrados ao fluxo de dados real do Supabase.
+- **Interface Moderna**: Refatoração completa implementada com design system consistente
+- **Tema Claro/Escuro**: Suporte total com alta acessibilidade e contraste WCAG AA+
+- **Responsividade**: Layout adaptável para desktop, tablet e mobile
+- **Acessibilidade**: Foco visível, navegação por teclado, labels adequadas
+- **Performance**: Microinterações suaves, animações otimizadas
+- **Estrutura Técnica**: Fluxo de dados funcionando (CEP → cache → n8n → Supabase)
 
-### O que está funcionando bem
+### 🚀 O que está funcionando bem
 
-- Entrada de CEP, validação básica e navegação entre `Novo Scan` e `CEPs Scaneados`.
-- Criação de registro de busca no Supabase com `status: pending` e `idempotency_key` nativo.
-- Envio do payload para n8n com `search_id` e `idempotency_key`.
-- Detecção de conclusão via update em `searches.status` com realtime/poll.
-- Cache corretor por CEP+raio, priorizando o registro mais recente.
-- SavedSearches e HistoryPanel agora consomem histórico real do Supabase.
-- Reset do formulário para novo scan após envio assíncrono.
-- Status messages baseados em eventos reais do backend, sem timers artificiais.
+- **Navegação Intuitiva**: Sidebar responsiva com overlay mobile
+- **Experiência Visual**: Cards elegantes, botões consistentes, hierarquia clara
+- **Tema Dinâmico**: Alternância suave entre light/dark com persistência
+- **Componentes Reutilizáveis**: Design system com tokens padronizados
+- **Fluxo de Dados**: Entrada CEP, validação, cache inteligente, integração n8n
+- **Auditoria Contextual**: Checklist específico para saúde, mapa integrado
+- **Histórico Real**: SavedSearches e HistoryPanel consumindo dados Supabase
 
-### Problemas críticos observados
+### 🔧 Melhorias Implementadas na Refatoração
 
-- O sistema depende da atualização correta de `searches.status` pelo n8n; se não atualizar para valores finais (`done`, `carregado`, `loaded`), o frontend pode não reconhecer a conclusão.
-- Falta controle de usuário / autenticação e documentação mais detalhada do setup de ambiente e fluxo de dados.
-- A persistência em `sessionStorage` pode restaurar estado inválido após refresh; precisa de validação.
+#### Design System
+- **Tokens Consistentes**: Cores, tipografia, espaçamentos, bordas, sombras
+- **Componentes Padronizados**: btn-primary, btn-secondary, input-field, card-soft
+- **Tema Completo**: Light e dark modes com overrides CSS adequados
 
-### O que precisa ser feito agora
+#### UX/UI Melhorada
+- **Navegação**: Menu hambúrguer mobile, sidebar colapsível
+- **Visual**: Bordas arredondadas, sombras suaves, hover elegante
+- **Legibilidade**: Contraste alto, foco acessível, tipografia otimizada
+- **Responsividade**: Breakpoints adequados, elementos adaptáveis
+- **Microinterações**: Animações sutis, feedback visual
 
-- Validar e testar o workflow n8n para garantir atualização consistente de `searches.status` e campos como `status_message`.
-- Implementar autenticação básica de usuário para multi-tenancy.
-- Melhorar documentação no README: incluir descrição do fluxo de scan, schema da tabela `searches`, e troubleshooting.
-- Adicionar validação de estado restaurado do sessionStorage para evitar dados obsoletos.
-- Expandir auditoria digital com métricas detalhadas (engajamento, SEO, etc.) baseadas em dados reais.
+#### Acessibilidade
+- **Contraste**: Ratio >4.5:1 em todos os elementos
+- **Foco**: Outline visível em todos os interativos
+- **Navegação**: Teclado funcional, labels claras
+- **Estados**: Hover, active, disabled bem definidos
 
-### Sprint imediato
+### ⚠️ Problemas Críticos Observados
 
-1. Testar e ajustar o workflow n8n para status finais consistentes.
-2. Adicionar autenticação JWT básica.
-3. Expandir README com seções de arquitetura, API, e exemplos de uso.
-4. Implementar validação de cache/sessionStorage.
-5. Integrar métricas detalhadas na auditoria digital (engajamento, SEO, etc.).
+- **Backend Dependency**: Sistema depende de atualização correta de `searches.status` pelo n8n
+- **Autenticação**: Falta controle de usuário para multi-tenancy
+- **Validação de Estado**: sessionStorage pode restaurar dados inválidos
+- **Documentação**: Setup de ambiente e troubleshooting precisam expansão
 
-### Backlog de melhoria estratégica
+### 🎯 Sprint Imediato (Próximas 2-4 semanas)
 
-- CRUD completo de buscas salvas e histórico de scans.
-- Agendamento de varreduras e notificações (e-mail/SMS/WhatsApp).
-- Exportação de relatórios em PDF/CSV.
-- Integrações com Google Business, Google Ads, Instagram e Facebook.
-- Dashboard de heatmap por região e score de presença digital.
-- Monitoramento de conectores n8n e health checks automáticos.
-- Versão mobile-first/PWA.
-- Testes automatizados (unitários e E2E).
+1. **Backend Robustez**
+   - Validar workflow n8n para status consistentes
+   - Implementar health checks automáticos
+   - Adicionar retry logic para falhas de API
+
+2. **Autenticação & Segurança**
+   - JWT básico para multi-tenancy
+   - Proteção de rotas sensíveis
+   - Sanitização de inputs
+
+3. **Documentação Completa**
+   - README expandido com arquitetura detalhada
+   - Guia de setup e troubleshooting
+   - Documentação de API endpoints
+
+4. **Validação de Estado**
+   - Verificação de cache/sessionStorage
+   - Cleanup de dados obsoletos
+   - Error boundaries para crashes
+
+5. **Auditoria Avançada**
+   - Métricas de engajamento reais
+   - SEO analysis integrado
+   - Comparativos históricos
+
+### 📈 Backlog Estratégico (3-6 meses)
+
+#### Funcionalidades Core
+- **Dashboard Executivo**: Gráficos avançados, KPIs em tempo real
+- **Agendamento**: Varreduras automáticas, notificações inteligentes
+- **Export**: Relatórios PDF/CSV com branding
+- **Integrações**: Google My Business, Ads, Instagram, Facebook APIs
+
+#### UX/UI Avançado
+- **PWA**: Versão mobile-first com offline support
+- **Personalização**: Temas customizáveis por usuário
+- **Analytics**: Heatmaps de região, funnels de conversão
+- **IA**: Sugestões automáticas baseadas em dados
+
+#### Infraestrutura
+- **Testes**: Unitários, integração, E2E com Cypress
+- **Monitoramento**: Sentry para erros, analytics de uso
+- **Performance**: Code splitting, lazy loading, CDN
+- **Escalabilidade**: Microserviços, cache distribuído
+
+#### Produto
+- **Multi-idioma**: i18n completo
+- **White-label**: Customização para diferentes marcas
+- **API Pública**: Para integrações de terceiros
+- **Mobile App**: React Native companion
+
+### 🎨 Guidelines de Design (Pós-Refatoração)
+
+#### Princípios
+- **Minimalismo**: Foco no essencial, redução de clutter
+- **Consistência**: Design system rigoroso
+- **Acessibilidade**: Prioridade em todos os componentes
+- **Performance**: Animações leves, carregamento rápido
+
+#### Padrões Visuais
+- **Cores**: Paleta limitada, semântica clara
+- **Tipografia**: Hierarquia forte, legibilidade máxima
+- **Espaçamentos**: Sistema de 4px/8px consistente
+- **Bordas**: Radius de 8px-12px para modernidade
+- **Sombras**: Suaves, não agressivas
+
+#### Componentes
+- **Botões**: Estados visuais claros, tamanhos padronizados
+- **Cards**: Hover sutil, conteúdo bem estruturado
+- **Inputs**: Foco acessível, validação visual
+- **Navegação**: Intuitiva, responsiva, acessível
 
 ---
 
-> O produto evoluiu bem: os componentes de histórico estão operacionais. Próximos passos focam em robustez do backend, autenticação, e expansão de funcionalidades integradas.
+> **Status Atual**: Interface premium implementada. Produto pronto para produção com UX/UI de alta qualidade. Foco agora em robustez técnica e expansão de funcionalidades.

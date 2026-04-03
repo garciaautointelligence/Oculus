@@ -12,6 +12,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [darkMode, setDarkMode] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('oculus-theme');
@@ -27,21 +28,33 @@ export default function App() {
   const handleNewAnalysis = () => {
     // UX: Nova Análise deve levar ao painel de exploração por padrão
     setActiveTab('explore');
+    setSidebarOpen(false);
   };
 
   const handleAuditLead = (lead) => {
     setSelectedLead(lead);
     setActiveTab('audit');
+    setSidebarOpen(false);
   };
 
   return (
     <div className="flex min-h-screen bg-surface text-on-surface">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onNewAnalysis={handleNewAnalysis} />
+      <Sidebar 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        onNewAnalysis={handleNewAnalysis}
+        isOpen={sidebarOpen}
+        setIsOpen={setSidebarOpen}
+      />
       
-      <main className="ml-64 flex-1 flex flex-col min-h-screen">
-        <TopBar darkMode={darkMode} onThemeToggle={() => setDarkMode((current) => !current)} />
+      <main className="lg:ml-64 flex-1 flex flex-col min-h-screen">
+        <TopBar 
+          darkMode={darkMode} 
+          onThemeToggle={() => setDarkMode((current) => !current)}
+          onMenuToggle={() => setSidebarOpen(true)}
+        />
         
-        <div className="p-8">
+        <div className="p-4 lg:p-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
