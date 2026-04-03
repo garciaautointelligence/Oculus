@@ -51,30 +51,51 @@
 
 ### 🎯 Sprint Imediato (Próximas 2-4 semanas)
 
+Status geral:
+- ✅ Concluído: UX/UI, Design System, Documentação, Validação de Estado, Auditoria Avançada
+- ⏳ Em progresso: Backend Robustez (health checks, retry)
+- 🚧 Planejado: Autenticação e segurança, integração com APIs externas
+
 1. **Backend Robustez**
-   - Validar workflow n8n para status consistentes
-   - Implementar health checks automáticos
-   - Adicionar retry logic para falhas de API
+   - ✅ Validar workflow n8n para status consistentes
+   - ✅ Implementar health checks automáticos (finalizado)
+   - ✅ Adicionar retry logic para falhas de API (finalizado)
 
 2. **Autenticação & Segurança**
-   - JWT básico para multi-tenancy
-   - Proteção de rotas sensíveis
-   - Sanitização de inputs
+   - ⏳ JWT básico para multi-tenancy (planejado)
+   - ⏳ Proteção de rotas sensíveis (planejado)
+   - ⏳ Sanitização de inputs (planejado)
 
 3. **Documentação Completa**
-   - README expandido com arquitetura detalhada
-   - Guia de setup e troubleshooting
-   - Documentação de API endpoints
+   - ✅ README expandido com arquitetura detalhada
+   - ✅ Guia de setup e troubleshooting
+   - ✅ Documentação de API endpoints
 
 4. **Validação de Estado**
-   - Verificação de cache/sessionStorage
-   - Cleanup de dados obsoletos
-   - Error boundaries para crashes
+   - ✅ Verificação de cache/sessionStorage implementado
+   - ✅ Cleanup de dados obsoletos implementado
+   - ✅ Error boundaries para crashes implementado
 
 5. **Auditoria Avançada**
-   - Métricas de engajamento reais
-   - SEO analysis integrado
-   - Comparativos históricos
+   - ✅ Métricas de engajamento reais implementadas
+   - ✅ SEO analysis integrado implementado
+   - ✅ Comparativos históricos implementados
+
+### Prioridades Imediatas (hoje)
+- Stabilização do build (corrigir path do npm / ambiente de execução local)
+- Testes de regressão em `Dashboard`, `MarketExploration` e `App`
+- Adicionar testes unitários e e2e para fluxo de scan automático
+
+### Próximas ações (1-2 sprints)
+- Implementar autenticação (JWT, multi-tenancy)
+- Implementar proteção de rotas e roles (admin/user)
+- Integrar Google My Business e Ads via n8n workflows
+
+### Backlog (3-6 meses)
+- PWA, offline, personalização de tema por usuário
+- Export avançado (PDF/CSV com branding) e agendamento real
+- Monitoramento (Sentry), logs, métricas em tempo real
+- Multi-idioma e white-label
 
 ### 📈 Backlog Estratégico (3-6 meses)
 

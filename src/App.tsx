@@ -110,6 +110,30 @@ export default function App() {
     localStorage.setItem('oculus-theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
 
+  useEffect(() => {
+    const onThemePresetChange = (event) => {
+      const preset = event.detail;
+      const themeClasses = ['theme-sunny', 'theme-aqua', 'theme-night'];
+      document.documentElement.classList.remove(...themeClasses);
+
+      if (themeClasses.includes(`theme-${preset}`)) {
+        document.documentElement.classList.add(`theme-${preset}`);
+        localStorage.setItem('oculus-theme-preset', preset);
+      } else {
+        localStorage.removeItem('oculus-theme-preset');
+      }
+    };
+
+    window.addEventListener('themePresetChange', onThemePresetChange);
+
+    const savedPreset = localStorage.getItem('oculus-theme-preset');
+    if (savedPreset && themeClasses.includes(`theme-${savedPreset}`)) {
+      document.documentElement.classList.add(`theme-${savedPreset}`);
+    }
+
+    return () => window.removeEventListener('themePresetChange', onThemePresetChange);
+  }, []);
+
   const handleNewAnalysis = () => {
     // UX: Nova Análise deve levar ao painel de exploração por padrão
     setActiveTab('explore');

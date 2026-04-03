@@ -77,6 +77,42 @@ html.dark {
   --color-outline-variant: #59607a;
 }
 
+html.theme-sunny {
+  --color-primary: #f5a623;
+  --color-primary-container: #fff2d1;
+  --color-secondary: #117864;
+  --color-secondary-container: #d8f3ee;
+  --color-surface: #fff9ed;
+  --color-surface-container: #fff2dc;
+  --color-on-surface: #2d1d0d;
+  --color-on-primary: #ffffff;
+  --color-on-secondary: #ffffff;
+}
+
+html.theme-aqua {
+  --color-primary: #00a2ff;
+  --color-primary-container: #d2f3ff;
+  --color-secondary: #0077b6;
+  --color-secondary-container: #d6f0ff;
+  --color-surface: #eafafb;
+  --color-surface-container: #d3f3fa;
+  --color-on-surface: #023047;
+  --color-on-primary: #ffffff;
+  --color-on-secondary: #ffffff;
+}
+
+html.theme-night {
+  --color-primary: #c490ff;
+  --color-primary-container: #39224f;
+  --color-secondary: #7be3ff;
+  --color-secondary-container: #1c2f4f;
+  --color-surface: #0f1a2a;
+  --color-surface-container: #162a40;
+  --color-on-surface: #e5ecff;
+  --color-on-primary: #0f1a2a;
+  --color-on-secondary: #0f1a2a;
+}
+
 @layer base {
   body {
     @apply bg-surface text-on-surface font-body antialiased;

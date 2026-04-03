@@ -147,6 +147,21 @@ export const TopBar: React.FC<TopBarProps> = ({ darkMode, onThemeToggle, onMenuT
           />
         </div>
 
+        <select
+          className="input-field w-44"
+          onChange={(e) => {
+            const event = new CustomEvent('themePresetChange', { detail: e.target.value });
+            window.dispatchEvent(event);
+          }}
+          defaultValue="default"
+          aria-label="Selecionar tema"
+        >
+          <option value="default">Tema Padrão</option>
+          <option value="sunny">Tema Sunny</option>
+          <option value="aqua">Tema Aqua</option>
+          <option value="night">Tema Night</option>
+        </select>
+
         <button
           onClick={onThemeToggle}
           className="p-2 text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] rounded-lg transition-colors"

@@ -1,0 +1,20 @@
+{
+  "name": "Oculus - Market Analysis",
+  "short_name": "Oculus",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#02050e",
+  "theme_color": "#1a5383",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
