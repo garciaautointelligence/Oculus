@@ -59,6 +59,22 @@ export const DigitalAudit: React.FC<DigitalAuditProps> = ({ lead }) => {
     }
   };
 
+  const hasGoogleMyBusiness = Boolean(lead.endereco);
+  const hasContactInfo = Boolean(lead.telefone || lead.email || lead.site);
+  const hasSocialPresence = Boolean(lead.redesocial);
+  const isSecureSite = Boolean(lead.site && lead.site.startsWith('https://'));
+
+  const auditChecklist = [
+    { label: 'Ficha de Google Meu Negócio', ok: hasGoogleMyBusiness },
+    { label: 'Contato visível', ok: hasContactInfo },
+    { label: 'Perfil social ativo', ok: hasSocialPresence },
+    { label: 'Site seguro (HTTPS)', ok: isSecureSite },
+  ];
+
+  const mapUrl = lead.endereco
+    ? `https://www.google.com/maps?q=${encodeURIComponent(lead.endereco)}&output=embed`
+    : null;
+
   return (
     <div className="space-y-12 max-w-7xl mx-auto w-full">
       <section className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -138,6 +154,21 @@ export const DigitalAudit: React.FC<DigitalAuditProps> = ({ lead }) => {
               </div>
             )}
           </div>
+
+          {mapUrl && (
+            <div className="mt-6">
+              <h4 className="font-headline font-bold text-lg mb-3">Localização no Mapa</h4>
+              <div className="h-64 rounded-xl overflow-hidden border border-outline-variant/30">
+                <iframe
+                  title="Mapa de localização"
+                  src={mapUrl}
+                  className="w-full h-full"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="lg:col-span-4 bg-surface-container-high rounded-xl p-6">
@@ -156,6 +187,37 @@ export const DigitalAudit: React.FC<DigitalAuditProps> = ({ lead }) => {
             <div className="flex justify-between items-center">
               <span className="text-sm text-on-surface-variant">Categoria</span>
               <span className="font-medium text-on-surface">{lead.categoria}</span>
+            </div>
+
+            <div className="border-t border-outline-variant/30 mt-4 pt-4">
+              <h5 className="text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-3">Checklist de Saúde Digital</h5>
+              <ul className="space-y-2">
+                {auditChecklist.map((item) => (
+                  <li key={item.label} className="flex items-center gap-2 text-sm">
+                    {item.ok ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <AlertCircle className="w-4 h-4 text-error-container" />}
+                    <span className={item.ok ? 'text-on-surface' : 'text-error-container'}>{item.label}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="border-t border-outline-variant/30 mt-4 pt-4">
+              <h5 className="text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-2">Detalhes Extras</h5>
+              <p className="text-sm text-on-surface-variant leading-relaxed">
+                - Boa base para operação local. Sugestão de próximos passos: validar informações no Google Maps e publicar alterações nos perfis sociais.
+              </p>
+              <p className="text-sm text-on-surface-variant leading-relaxed mt-1">
+                - Se o site não usar HTTPS, considere migração rápida; para leads com notas < 60, priorizar correção de contacto e SEO on-page.
+              </p>
+            </div>
+
+            <div className="border-t border-outline-variant/30 mt-4 pt-4">
+              <h5 className="text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-2">Recomendações Rápidas</h5>
+              <ul className="text-sm text-on-surface-variant space-y-1">
+                <li>• Atualizar endereço e horário no Google Meu Negócio</li>
+                <li>• Garantir telefone e website acessíveis em todas as páginas</li>
+                <li>• Publicar conteúdo local para melhorar SEO de bairro</li>
+              </ul>
             </div>
           </div>
         </div>

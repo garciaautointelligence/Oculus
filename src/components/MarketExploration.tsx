@@ -425,7 +425,7 @@ export const MarketExploration: React.FC<MarketExplorationProps> = ({ onAuditLea
             <div className="flex justify-between items-center">
               <button
                 onClick={() => onAuditLead(lead)}
-                className="flex items-center gap-2 px-4 py-2 bg-tertiary/10 hover:bg-tertiary/20 text-tertiary rounded-lg transition-colors text-sm font-medium"
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors text-sm font-medium shadow-lg shadow-emerald-500/25"
                 title="Auditar presença digital"
               >
                 <ShieldCheck className="w-4 h-4" />
