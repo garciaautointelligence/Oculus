@@ -11,6 +11,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [darkMode, setDarkMode] = useState(false);
+  const [selectedLead, setSelectedLead] = useState(null);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('oculus-theme');
@@ -26,6 +27,11 @@ export default function App() {
   const handleNewAnalysis = () => {
     // UX: Nova Análise deve levar ao painel de exploração por padrão
     setActiveTab('explore');
+  };
+
+  const handleAuditLead = (lead) => {
+    setSelectedLead(lead);
+    setActiveTab('audit');
   };
 
   return (
@@ -45,8 +51,8 @@ export default function App() {
               transition={{ duration: 0.25, ease: 'easeOut' }}
             >
               {activeTab === 'dashboard' && <Dashboard />}
-              {activeTab === 'explore' && <MarketExploration />}
-              {activeTab === 'audit' && <DigitalAudit />}
+              {activeTab === 'explore' && <MarketExploration onAuditLead={handleAuditLead} />}
+              {activeTab === 'audit' && <DigitalAudit lead={selectedLead} />}
               {activeTab === 'automation' && <AutomationEngine />}
               {activeTab === 'saved' && <SavedSearches />}
               {activeTab === 'history' && <HistoryPanel />}

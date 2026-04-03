@@ -49,7 +49,11 @@ interface Lead {
   nivel: 'quente' | 'morno' | 'frio';
 }
 
-export const MarketExploration: React.FC = () => {
+interface MarketExplorationProps {
+  onAuditLead?: (lead: Lead) => void;
+}
+
+export const MarketExploration: React.FC<MarketExplorationProps> = ({ onAuditLead }) => {
   const [cep, setCep] = useState('');
   const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
@@ -328,7 +332,7 @@ export const MarketExploration: React.FC = () => {
   // Total de páginas sem filtro (para casos onde selectedCategory === 'todos')
   const totalPages = selectedCep?.totalPages || 0;
 
-  const LeadCard: React.FC<{ lead: Lead }> = ({ lead }) => {
+  const LeadCard: React.FC<{ lead: Lead; onAuditLead?: (lead: Lead) => void }> = ({ lead, onAuditLead }) => {
     const isHot = lead.nivel === 'quente';
 
     return (
@@ -414,6 +418,20 @@ export const MarketExploration: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* Audit Button */}
+          {onAuditLead && (
+            <div className="flex justify-between items-center">
+              <button
+                onClick={() => onAuditLead(lead)}
+                className="flex items-center gap-2 px-4 py-2 bg-tertiary/10 hover:bg-tertiary/20 text-tertiary rounded-lg transition-colors text-sm font-medium"
+                title="Auditar presença digital"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                Auditar
+              </button>
+            </div>
+          )}
 
           {/* Status Badge */}
           <div className="flex justify-end">
@@ -780,7 +798,7 @@ export const MarketExploration: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {paginatedLeads.map((lead, index) => (
-                    <LeadCard key={index} lead={lead} />
+                    <LeadCard key={index} lead={lead} onAuditLead={onAuditLead} />
                   ))}
                 </div>
               </div>

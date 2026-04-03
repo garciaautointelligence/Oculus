@@ -1,23 +1,66 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+<img width="1200" height="475" alt="Oculus Banner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Oculus - Garcia Intelligence
+# Oculus - Market Analysis App
 
-App de análise de mercado e presença digital. A integração de dados é feita via n8n (webhook) e o produto é chamado Oculus, alimentado por Garcia Intelligence.
+Aplicativo de análise de mercado e presença digital. A integração de dados é realizada via n8n (webhook) e utiliza Supabase como backend para armazenamento e gerenciamento de dados.
 
-Webhook n8n de referência:
-`https://auris-intelligence.app.n8n.cloud/webhook/oculus`
+## Funcionalidades
 
-## Run Locally
+- **Análise de Mercado**: Pesquisa de leads por CEP e raio, com cache inteligente.
+- **Histórico de Buscas**: Visualização de buscas salvas e histórico completo.
+- **Auditoria Digital**: Avaliação da presença digital de empresas.
+- **Automação de Processos**: Ferramentas para automação de tarefas relacionadas ao mercado.
 
-**Prerequisites:** Node.js
+## Arquitetura
 
-1. Install dependencies:
-   `npm install`
-2. Create a `.env.local` file with the required environment variables:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_KEY`
-   - `VITE_N8N_WEBHOOK`
-3. Run the app:
-   `npm run dev`
+O projeto é dividido em frontend (React/Vite) e backend (n8n + Supabase).
+
+### Fluxo de Scan
+1. Usuário insere CEP e raio.
+2. Frontend cria registro de busca no Supabase com status `pending`.
+3. Dispara webhook para n8n com `search_id` e `idempotency_key`.
+4. n8n processa os dados e atualiza o status no Supabase para `done`, `carregado` ou `loaded`.
+5. Frontend monitora o status em tempo real e exibe os resultados.
+
+### Schema da Tabela `searches`
+- `id`: UUID primário
+- `cep`: String (CEP da busca)
+- `raio_km`: Número (raio em km)
+- `status`: String (pending, processing, done, etc.)
+- `status_message`: String opcional
+- `total_leads`: Número opcional
+- `created_at`: Timestamp
+- `completed_at`: Timestamp opcional
+- `idempotency_key`: String único
+
+## Executar Localmente
+
+**Pré-requisitos:** Node.js
+
+1. Instalar dependências:
+   ```
+   npm install
+   ```
+2. Criar um arquivo `.env.local` com as variáveis de ambiente necessárias (consulte a documentação interna para obter os valores).
+3. Executar o aplicativo:
+   ```
+   npm run dev
+   ```
+
+## Desenvolvimento
+
+- **Frontend**: React com TypeScript, Vite para build.
+- **Backend**: Supabase para dados, n8n para automação.
+- **Estilos**: CSS customizado com Material Design principles.
+
+## Troubleshooting
+
+- **Problemas com status**: Verifique se o workflow n8n está atualizando corretamente o campo `status` na tabela `searches`.
+- **Cache não carregando**: Certifique-se de que o registro mais recente por CEP+raio está sendo priorizado.
+- **Env vars**: Todas as variáveis de ambiente devem estar definidas no `.env.local`.
+
+## Roadmap
+
+Consulte o [ROADMAP.md](ROADMAP.md) para futuras melhorias e funcionalidades planejadas.
