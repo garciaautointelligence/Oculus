@@ -17,7 +17,8 @@ import {
   Mail,
   ExternalLink,
   MapIcon,
-  Flame
+  Flame,
+  ShieldCheck
 } from 'lucide-react';
 import { buscarLeads, verificarCache, buscarHistorico, buscarLeadsPorCep } from '../lib/supabase-client';
 
