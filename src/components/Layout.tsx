@@ -89,7 +89,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onNew
               onNewAnalysis();
               setIsOpen(false);
             }}
-            className="w-full bg-gradient-to-r from-[var(--color-tertiary)] via-yellow-300 to-[var(--color-primary)] text-black drop-shadow-xl font-bold py-3 rounded-md flex items-center justify-center gap-2 hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 shadow-xl shadow-[var(--color-tertiary)]/30 transition-all"
+            className="w-full bg-[var(--color-tertiary)] text-[var(--color-on-tertiary)] drop-shadow-xl font-bold py-3 rounded-md flex items-center justify-center gap-2 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 shadow-xl shadow-[var(--color-tertiary)]/30 transition-all"
             aria-label="Iniciar nova análise"
           >
             <PlusCircle className="w-4 h-4" />
