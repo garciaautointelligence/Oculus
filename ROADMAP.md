@@ -52,9 +52,10 @@
 ### 🎯 Sprint Imediato (Próximas 2-4 semanas)
 
 Status geral:
-- ✅ Concluído: UX/UI, Design System, Documentação, Validação de Estado, Auditoria Avançada
-- ⏳ Em progresso: Backend Robustez (health checks, retry)
-- 🚧 Planejado: Autenticação e segurança, integração com APIs externas
+- ✅ Concluído: UX/UI, Design System, Documentação, Validação de Estado, Auditoria Avançada, PWA/offline, tematização customizável
+- ✅ Concluído: Backend Robustez (health checks, retry)
+- ⏳ Em progresso: Autenticação e segurança, integração com APIs externas
+- ⏳ Em progresso: Analytics de conversão (heatmaps/funnels) e AI insights
 
 1. **Backend Robustez**
    - ✅ Validar workflow n8n para status consistentes
@@ -82,9 +83,11 @@ Status geral:
    - ✅ Comparativos históricos implementados
 
 ### Prioridades Imediatas (hoje)
-- Stabilização do build (corrigir path do npm / ambiente de execução local)
-- Testes de regressão em `Dashboard`, `MarketExploration` e `App`
-- Adicionar testes unitários e e2e para fluxo de scan automático
+- ✅ Stabilização do build (corrigir path do npm / ambiente de execução local) - dependência local
+- ⏳ Testes de regressão em `Dashboard`, `MarketExploration` e `App` (parcialmente completos)
+- ⏳ Adicionar testes unitários e e2e para fluxo de scan automático (em progresso)
+- ⏳ Autenticação JWT + roles (planejamento ativo)
+- ⏳ Integração Google APIs via n8n (pendente deploy)
 
 ### Próximas ações (1-2 sprints)
 - Implementar autenticação (JWT, multi-tenancy)
@@ -106,10 +109,10 @@ Status geral:
 - **Integrações**: Google My Business, Ads, Instagram, Facebook APIs
 
 #### UX/UI Avançado
-- **PWA**: Versão mobile-first com offline support
-- **Personalização**: Temas customizáveis por usuário
-- **Analytics**: Heatmaps de região, funnels de conversão
-- **IA**: Sugestões automáticas baseadas em dados
+- ✅ **PWA**: Versão mobile-first com offline support implementado
+- ✅ **Personalização**: Temas customizáveis por usuário com presets Sunny/Aqua/Night
+- ⏳ **Analytics**: Heatmaps de região e funnels em planejamento (base ready)
+- ⏳ **IA**: Sugestões automáticas baseadas em dados em planejamento (pipeline built via n8n)
 
 #### Infraestrutura
 - **Testes**: Unitários, integração, E2E com Cypress
