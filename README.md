@@ -151,3 +151,81 @@ Consulte o [ROADMAP.md](ROADMAP.md) para funcionalidades planejadas e melhorias 
 - 🔄 Notificações push
 - 🔄 Export de relatórios PDF
 - 🔄 Multi-idioma (i18n)
+
+---
+
+## 3. Documentação Completa
+
+### 3.1 Arquitetura Detalhada
+- **Frontend**: React + TypeScript + Vite.
+  - `App.tsx`: estado global de tema, aba ativa, layout principal.
+  - `components/`: cada tela em componente desacoplado (Dashboard, MarketExploration, DigitalAudit, etc.).
+  - `lib/supabase-client.js`: wrapper de acesso ao Supabase.
+  - `index.css`: design tokens, temas e componentes globais.
+- **Backend**: Supabase (Postgres) + n8n para processamento assíncrono de scans.
+  - **Tabela principal**: `searches` (CEP, raio, status, resultados, timestamps).
+  - **Fluxo**: UI -> Supabase create pending -> n8n webhook -> update status/result -> UI refetch.
+
+### 3.2 Guia de Setup
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/<empresa>/Oculus.git
+   cd Oculus
+   ```
+2. Instale dependências:
+   ```bash
+   npm install
+   ```
+3. Configure variáveis em `.env.local` (base em `.env.example`):
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_KEY`
+   - `N8N_WEBHOOK_URL`
+4. Execute em modo dev:
+   ```bash
+   npm run dev
+   ```
+5. Build e preview:
+   ```bash
+   npm run build
+   npm run preview
+   ```
+
+### 3.3 Troubleshooting
+- **`npm` não encontrado**: instale Node.js 18+ e adicione ao PATH.
+- **Erro no tailwind**: limpe cache e reinicie dev server:
+  ```bash
+  rm -rf node_modules/.cache
+  npm run dev
+  ```
+- **Tema não alterna**: confirme se `html` tem classe `dark`, e se `localStorage` está guardando `theme`.
+- **Falha de CORS ou webhook**: ajuste regras no n8n e Supabase (Policies e CORS permitidos).
+- **Timeout no scan**: aumente timeout no n8n ou divida processo em passos menores.
+
+### 3.4 Documentação de API Endpoints
+> Observação: os endpoints podem estar no n8n (webhook) ou Supabase REST.
+
+#### 3.4.1 **GET** `/api/searches` (Supabase)
+- Retorna histórico de buscas do usuário.
+- Query params: `cep`, `status`, `limit`, `offset`.
+
+#### 3.4.2 **POST** `/api/searches` (Supabase + n8n)
+- Cria nova busca e dispara workflow.
+- Payload:
+  - `cep` (string)
+  - `raio_km` (number)
+  - `idempotency_key` (string)
+- Resposta: `{id, status, created_at}`.
+
+#### 3.4.3 **PATCH** `/api/searches/:id` (n8n worker)
+- Atualiza status/resultados após processamento.
+- Payload:
+  - `status`: `pending|processing|done|failed`
+  - `status_message` (opcional)
+  - `total_leads`, `completed_at`, `result_data`.
+
+#### 3.4.4 **POST** `/api/scan/retry` (frontend)
+- Reenvia scan anterior (código front) para reprocessamento via `idempotency_key`.
+
+
+> Dica: use Postman ou Insomnia com collection para testes rápidos e regressivos.
+

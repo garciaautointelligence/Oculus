@@ -333,6 +333,24 @@ export const MarketExploration: React.FC<MarketExplorationProps> = ({ onAuditLea
   // Total de páginas sem filtro (para casos onde selectedCategory === 'todos')
   const totalPages = selectedCep?.totalPages || 0;
 
+  const engagementTotal = selectedCep?.leads?.length || 0;
+  const engagementWithSite = selectedCep?.leads?.filter((lead) => lead?.site && lead.site.trim()).length || 0;
+  const engagementWithSocial = selectedCep?.leads?.filter((lead) => lead?.redesocial && lead.redesocial.trim()).length || 0;
+  const engagementWithEmail = selectedCep?.leads?.filter((lead) => lead?.email && lead.email.trim()).length || 0;
+  const engagementWithPhone = selectedCep?.leads?.filter((lead) => lead?.telefone && lead.telefone.trim()).length || 0;
+  const averageScore = engagementTotal > 0
+    ? Number((selectedCep.leads.reduce((sum, lead) => sum + (Number(lead.score) || 0), 0) / engagementTotal).toFixed(1))
+    : 0;
+  const seoOptimized = selectedCep?.leads?.filter((lead) => lead?.site && /^https?:\/\//.test(lead.site)).length || 0;
+  const seoScore = engagementTotal > 0 ? Math.round((seoOptimized / engagementTotal) * 100) : 0;
+
+  const historicoTotals = scannedCeps
+    .map((c) => c.totalLeads || 0)
+    .filter((n) => n > 0);
+  const historicoMedia = historicoTotals.length > 0 ? Math.round(historicoTotals.reduce((sum, n) => sum + n, 0) / historicoTotals.length) : 0;
+  const melhorHistorico = historicoTotals.length > 0 ? Math.max(...historicoTotals) : 0;
+  const comparativoHistorico = engagementTotal > 0 ? `${engagementTotal} leads vs média ${historicoMedia} leads` : 'Sem dados para comparação';
+
   const LeadCard: React.FC<{ lead: Lead; onAuditLead?: (lead: Lead) => void }> = ({ lead, onAuditLead }) => {
     const isHot = lead.nivel === 'quente';
 
@@ -739,6 +757,30 @@ export const MarketExploration: React.FC<MarketExplorationProps> = ({ onAuditLea
                       {selectedCep.location.localidade} - {selectedCep.location.uf}
                     </span>
                   )}
+                </div>
+              </div>
+
+              {/* Auditoria Avançada: métricas de engajamento e SEO */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-surface-container p-4 rounded-xl border border-outline-variant/10 shadow-sm">
+                  <h5 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Engajamento Digital</h5>
+                  <p className="text-3xl font-black text-tertiary">{engagementTotal}</p>
+                  <small className="text-on-surface-variant">Total de leads</small>
+                  <div className="mt-2 text-sm text-on-surface-variant">
+                    Site: {engagementWithSite} | Social: {engagementWithSocial}
+                    <br />Email: {engagementWithEmail} | Telefone: {engagementWithPhone}
+                  </div>
+                </div>
+                <div className="bg-surface-container p-4 rounded-xl border border-outline-variant/10 shadow-sm">
+                  <h5 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">SEO Integrado</h5>
+                  <p className="text-3xl font-black text-primary">{seoScore}%</p>
+                  <small className="text-on-surface-variant">Websites corretamente formados</small>
+                  <div className="mt-2 text-sm text-on-surface-variant">{seoOptimized} de {engagementTotal}</div>
+                </div>
+                <div className="bg-surface-container p-4 rounded-xl border border-outline-variant/10 shadow-sm">
+                  <h5 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Comparativo Histórico</h5>
+                  <p className="text-3xl font-black text-secondary">{comparativoHistorico}</p>
+                  <small className="text-on-surface-variant">Média: {historicoMedia} | Maior: {melhorHistorico}</small>
                 </div>
               </div>
 
