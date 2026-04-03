@@ -9,8 +9,9 @@ Aplicativo de análise de mercado e presença digital com interface moderna e pr
 - **📊 Auditoria Digital**: Avaliação completa da presença digital com checklist contextual
 - **📚 Histórico de Buscas**: Interface organizada para visualizar buscas salvas e histórico
 - **🤖 Automação de Processos**: Ferramentas avançadas para automação de tarefas
-- **🌓 Tema Claro/Escuro**: Suporte completo para ambos os temas com alta acessibilidade
+- **🌓 Tema Claro/Escuro + Presets**: Suporte completo com persistência + presets (Sunny/Aqua/Night)
 - **📱 Design Responsivo**: Experiência otimizada para desktop, tablet e mobile
+- **🌐 PWA/offline**: Progressive Web App com cache e fallback de rede para uso móvel e offline
 
 ## 🎨 Design System
 
@@ -133,17 +134,19 @@ Consulte o [ROADMAP.md](ROADMAP.md) para funcionalidades planejadas e melhorias 
 
 ### Melhorias Recentes
 - ✅ Refatoração completa de UX/UI
-- ✅ Implementação de tema claro/escuro
+- ✅ Implementação de tema claro/escuro + presets personalizáveis
 - ✅ Design responsivo e acessível
 - ✅ Otimização de performance
 - ✅ Microinterações e animações
+- ✅ PWA/offline (manifest, SW, registro)
 
 ### Próximas Features
-- 🔄 Integração com Google My Business API
-- 🔄 Dashboard com gráficos avançados
-- 🔄 Notificações push
-- 🔄 Export de relatórios PDF
-- 🔄 Multi-idioma (i18n)
+- ⏳ Analytics avançado (heatmaps / funnels)
+- ⏳ IA de sugestões proativas (pipeline via n8n)
+- ⏳ Autenticação JWT + roles (multi-tenant)
+- ⏳ Integração com Google My Business / Ads via n8n
+- ⏳ Export de relatórios PDF/CSV com branding
+- ⏳ Multi-idioma (i18n)
 
 ---
 
@@ -170,9 +173,10 @@ Consulte o [ROADMAP.md](ROADMAP.md) para funcionalidades planejadas e melhorias 
    npm install
    ```
 3. Configure variáveis em `.env.local` (base em `.env.example`):
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_KEY`
-   - `N8N_WEBHOOK_URL`
+   - `VITE_SUPABASE_URL` (URL do projeto Supabase)
+   - `VITE_SUPABASE_KEY` (chave de leitura/gravação supabase; não commit)
+   - `N8N_WEBHOOK_URL` (endpoint do workflow n8n)
+   - `VITE_GOOGLE_API_KEY` (apenas quando integrar Google API; *nunca incluir em código público*)
 4. Execute em modo dev:
    ```bash
    npm run dev
