@@ -1,5 +1,5 @@
 <div align="center">
-<img width="1200" height="475" alt="Oculus Banner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+<img width="1200" height="475" alt="Oculus Banner" src="[https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6](https://media.licdn.com/dms/image/v2/D4D22AQGLmatWANysdw/feedshare-shrink_800/B4DZ1OEDmFKMAg-/0/1775131179776?e=1776902400&v=beta&t=-Ycg-aH507qlJh6Z3VJNsWxo2wdWSXNi4dgKbC5Latw)" />
 </div>
 
 # Oculus - Market Analysis App
