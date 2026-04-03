@@ -162,20 +162,3 @@ export const TopBar: React.FC<TopBarProps> = ({ darkMode, onThemeToggle, onMenuT
     </header>
   );
 };
-          <span className="absolute top-2 right-2 w-2 h-2 bg-tertiary rounded-full"></span>
-        </button>
-        <button className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
-          <Settings className="w-5 h-5" />
-        </button>
-        <div className="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30">
-          <img 
-            src="https://picsum.photos/seed/analyst/100/100" 
-            alt="User" 
-            referrerPolicy="no-referrer"
-            className="w-full h-full object-cover"
-          />
-        </div>
-      </div>
-    </header>
-  );
-};
