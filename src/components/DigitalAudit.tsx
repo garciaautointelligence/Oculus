@@ -45,17 +45,17 @@ export const DigitalAudit: React.FC<DigitalAuditProps> = ({ lead }) => {
 
   const getStatusText = (nivel: string) => {
     switch (nivel) {
-      case 'quente': return 'PRESENÇA FORTE';
-      case 'morno': return 'PRESENÇA MODERADA';
-      default: return 'PRESENÇA BÁSICA';
+      case 'quente': return 'Alta Prioridade';
+      case 'morno': return 'Presença Moderada';
+      default: return 'Presença Básica';
     }
   };
 
   const getStatusColor = (nivel: string) => {
     switch (nivel) {
-      case 'quente': return 'bg-error-container/20 text-error-container';
-      case 'morno': return 'bg-tertiary shadow-[0_0_8px_rgba(68,221,193,0.6)]';
-      default: return 'bg-surface-container-highest text-on-surface-variant';
+      case 'quente': return 'bg-red-500/20 text-red-500 border-red-500/30';
+      case 'morno': return 'bg-amber-500/20 text-amber-500 border-amber-500/30';
+      default: return 'bg-green-500/20 text-green-500 border-green-500/30';
     }
   };
 
@@ -94,8 +94,8 @@ export const DigitalAudit: React.FC<DigitalAuditProps> = ({ lead }) => {
           <div className="flex flex-col">
             <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Status</span>
             <div className="flex items-center gap-2 mt-1">
-              <span className={`w-2 h-2 rounded-full ${getStatusColor(lead.nivel)}`}></span>
-              <span className={`font-bold text-sm ${lead.nivel === 'quente' ? 'text-error-container' : lead.nivel === 'morno' ? 'text-tertiary' : 'text-on-surface-variant'}`}>
+              <span className={`w-3 h-3 rounded-full border ${getStatusColor(lead.nivel)}`}></span>
+              <span className={`font-bold text-sm ${lead.nivel === 'quente' ? 'text-red-500' : lead.nivel === 'morno' ? 'text-amber-500' : 'text-green-500'}`}>
                 {getStatusText(lead.nivel)}
               </span>
             </div>
@@ -180,7 +180,7 @@ export const DigitalAudit: React.FC<DigitalAuditProps> = ({ lead }) => {
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-on-surface-variant">Nível de Presença</span>
-              <span className={`px-2 py-1 rounded-full text-xs font-bold uppercase ${lead.nivel === 'quente' ? 'bg-error-container/20 text-error-container' : lead.nivel === 'morno' ? 'bg-tertiary/15 text-tertiary' : 'bg-surface-container-highest text-on-surface-variant'}`}>
+              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase border ${lead.nivel === 'quente' ? 'bg-red-500/20 text-red-500 border-red-500/30' : lead.nivel === 'morno' ? 'bg-amber-500/20 text-amber-500 border-amber-500/30' : 'bg-green-500/20 text-green-500 border-green-500/30'}`}>
                 {lead.nivel}
               </span>
             </div>
@@ -194,29 +194,32 @@ export const DigitalAudit: React.FC<DigitalAuditProps> = ({ lead }) => {
               <ul className="space-y-2">
                 {auditChecklist.map((item) => (
                   <li key={item.label} className="flex items-center gap-2 text-sm">
-                    {item.ok ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <AlertCircle className="w-4 h-4 text-error-container" />}
-                    <span className={item.ok ? 'text-on-surface' : 'text-error-container'}>{item.label}</span>
+                    {item.ok ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <AlertCircle className="w-4 h-4 text-red-500" />}
+                    <span className={item.ok ? 'text-on-surface' : 'text-red-500'}>{item.label}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
             <div className="border-t border-outline-variant/30 mt-4 pt-4">
-              <h5 className="text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-2">Detalhes Extras</h5>
+              <h5 className="text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-2">Insights Estratégicos</h5>
               <p className="text-sm text-on-surface-variant leading-relaxed">
-                - Boa base para operação local. Sugestão de próximos passos: validar informações no Google Maps e publicar alterações nos perfis sociais.
+                A presença no Google está bem estruturada, com telefone, site e localização acessíveis, o que favorece buscas locais por especialidade médica.
               </p>
               <p className="text-sm text-on-surface-variant leading-relaxed mt-1">
-                - Se o site não usar HTTPS, considere migração rápida; para leads com notas &lt; 60, priorizar correção de contacto e SEO on-page.
+                A ausência de perfis sociais profissionais identificáveis reduz sinais de autoridade e recorrência de contato para pacientes em fase de decisão.
+              </p>
+              <p className="text-sm text-on-surface-variant leading-relaxed mt-1">
+                Para especialidades médicas, avaliações, conteúdo institucional e consistência entre Google, site e diretórios aumentam confiança e taxa de agendamento.
               </p>
             </div>
 
             <div className="border-t border-outline-variant/30 mt-4 pt-4">
-              <h5 className="text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-2">Recomendações Rápidas</h5>
+              <h5 className="text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-2">Próximas Ações Recomendadas</h5>
               <ul className="text-sm text-on-surface-variant space-y-1">
-                <li>• Atualizar endereço e horário no Google Meu Negócio</li>
-                <li>• Garantir telefone e website acessíveis em todas as páginas</li>
-                <li>• Publicar conteúdo local para melhorar SEO de bairro</li>
+                <li>• Prioridade imediata: criar ou padronizar presença profissional no Instagram e/ou LinkedIn médico, mantendo identidade visual, especialidade, localização e canais de agendamento.</li>
+                <li>• Adicionar CTA claro de agendamento no site e reforçar prova social (depoimentos, convênios, diferenciais e especialidades).</li>
+                <li>• Revisar SEO local da página principal com foco em 'cirurgia de cabeça e pescoço em São Paulo'.</li>
               </ul>
             </div>
           </div>
