@@ -175,7 +175,7 @@ export default function App() {
               >
                 {activeTab === 'dashboard' && <Dashboard />}
                 {activeTab === 'explore' && <MarketExploration onAuditLead={handleAuditLead} />}
-                {activeTab === 'audit' && <DigitalAudit lead={selectedLead} />}
+                {activeTab === 'audit' && <DigitalAudit lead={selectedLead} onBack={() => { setSelectedLead(null); setActiveTab('explore'); }} />}
                 {activeTab === 'automation' && <AutomationEngine />}
                 {activeTab === 'saved' && <SavedSearches />}
                 {activeTab === 'history' && <HistoryPanel />}

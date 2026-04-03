@@ -11,7 +11,8 @@ import {
   ArrowRight,
   Phone,
   Mail,
-  ExternalLink
+  ExternalLink,
+  ArrowLeft
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -29,9 +30,10 @@ interface Lead {
 
 interface DigitalAuditProps {
   lead?: Lead | null;
+  onBack?: () => void;
 }
 
-export const DigitalAudit: React.FC<DigitalAuditProps> = ({ lead }) => {
+export const DigitalAudit: React.FC<DigitalAuditProps> = ({ lead, onBack }) => {
   if (!lead) {
     return (
       <div className="space-y-12 max-w-7xl mx-auto w-full">
@@ -78,12 +80,23 @@ export const DigitalAudit: React.FC<DigitalAuditProps> = ({ lead }) => {
   return (
     <div className="space-y-12 max-w-7xl mx-auto w-full">
       <section className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <h2 className="text-4xl font-headline font-extrabold text-[var(--color-on-surface)] tracking-tight mb-2">{lead.nome}</h2>
-          <p className="text-[var(--color-on-surface-variant)] flex items-center gap-2">
-            <MapPin className="w-4 h-4" />
-            {lead.endereco || 'Endereço não informado'} • <span className="text-[var(--color-tertiary)]">{lead.categoria}</span>
-          </p>
+        <div className="flex items-center gap-4">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="flex items-center gap-2 px-4 py-2 bg-[var(--color-surface-container)] hover:bg-[var(--color-surface-container-high)] rounded-lg transition-colors text-[var(--color-on-surface)]"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar
+            </button>
+          )}
+          <div>
+            <h2 className="text-4xl font-headline font-extrabold text-[var(--color-on-surface)] tracking-tight mb-2">{lead.nome}</h2>
+            <p className="text-[var(--color-on-surface-variant)] flex items-center gap-2">
+              <MapPin className="w-4 h-4" />
+              {lead.endereco || 'Endereço não informado'} • <span className="text-[var(--color-tertiary)]">{lead.categoria}</span>
+            </p>
+          </div>
         </div>
         <div className="flex gap-4">
           <div className="flex flex-col items-end">
