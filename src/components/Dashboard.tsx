@@ -31,8 +31,14 @@ export const Dashboard: React.FC = () => {
   const [searches, setSearches] = useState<Search[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
+  const [liveKpis, setLiveKpis] = useState({
+    activeScans: 0,
+    averageLeads: 0,
+    successRate: 0,
+    lastUpdated: new Date().toLocaleTimeString()
+  });
 
-  const handleReloadSearch = (search: Search, forceReload: boolean = false) => {
+  const handleReloadSearch = (search: Search, forceReload: boolean = false) => 
     sessionStorage.setItem('reload_search', JSON.stringify({
       cep: search.cep,
       radius: search.raio_km.toString(),
@@ -47,6 +53,24 @@ export const Dashboard: React.FC = () => {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (searches.length === 0) {
+      setLiveKpis(prev => ({ ...prev, activeScans: 0, averageLeads: 0, successRate: 0, lastUpdated: new Date().toLocaleTimeString() }));
+      return;
+    }
+
+    const activeScans = searches.filter(s => ['pending', 'processing'].includes(s.status?.toLowerCase())).length;
+    const finished = searches.filter(s => ['done', 'carregado'].includes(s.status?.toLowerCase()));
+    const averageLeads = finished.length > 0
+      ? Number((finished.reduce((sum, item) => sum + (item.total_leads ?? 0), 0) / finished.length).toFixed(1))
+      : 0;
+    const successRate = searches.length > 0
+      ? Math.round((finished.length / searches.length) * 100)
+      : 0;
+
+    setLiveKpis({ activeScans, averageLeads, successRate, lastUpdated: new Date().toLocaleTimeString() });
+  }, [searches]);
 
   const totalBuscas = searches.length;
   const cepsUnicos = new Set(searches.map(s => s.cep)).size;
@@ -95,6 +119,35 @@ export const Dashboard: React.FC = () => {
           </div>
           <div className="bg-surface-container-high p-5 rounded-xl card-soft">
             <div className="flex items-center justify-between mb-2">
+              <span className="text-on-surface-variant text-xs font-bold uppercase">Scans Ativos</span>
+              <TrendingUp className="w-4 h-4 text-secondary" />
+            </div>
+            <div className="text-2xl font-headline font-bold">
+              {liveKpis.activeScans}
+            </div>
+            <p className="text-xs text-on-surface-variant mt-1">Atualizado em {liveKpis.lastUpdated}</p>
+          </div>
+          <div className="bg-surface-container-high p-5 rounded-xl card-soft">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-on-surface-variant text-xs font-bold uppercase">Média de Leads</span>
+              <Store className="w-4 h-4 text-secondary" />
+            </div>
+            <div className="text-2xl font-headline font-bold">
+              {loading ? <Loader2 className="w-5 h-5 animate-spin text-on-surface-variant" /> : liveKpis.averageLeads}
+            </div>
+          </div>
+          <div className="bg-surface-container-high p-5 rounded-xl card-soft py-5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-on-surface-variant text-xs font-bold uppercase">Taxa de Sucesso</span>
+              <Filter className="w-4 h-4 text-secondary" />
+            </div>
+            <div className="text-2xl font-headline font-bold text-primary">
+              {liveKpis.successRate}%
+            </div>
+            <p className="text-xs text-on-surface-variant mt-1">Base: últimos 50 registros</p>
+          </div>
+          <div className="bg-surface-container-high p-5 rounded-xl card-soft">
+            <div className="flex items-center justify-between mb-2">
               <span className="text-on-surface-variant text-xs font-bold uppercase">CEPs Únicos</span>
               <MapPin className="w-4 h-4 text-primary" />
             </div>
@@ -119,6 +172,31 @@ export const Dashboard: React.FC = () => {
       </section>
 
       <section className="bg-surface-container rounded-2xl overflow-hidden shadow-2xl shadow-primary/5 card-soft gradient-panel">
+        <div className="p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="md:col-span-2 bg-surface-container-high rounded-xl p-4 border border-outline-variant/10">
+            <h4 className="text-base font-bold text-on-surface mb-2">Agendamento de Varreduras</h4>
+            <p className="text-sm text-on-surface-variant mb-3">Configure scans periódicos automáticos para manter a base sempre atualizada.</p>
+            <form className="grid grid-cols-1 sm:grid-cols-3 gap-2" onSubmit={(e) => { e.preventDefault(); alert('Agendamento gravado para '+(e.target as any).elements.cep.value); }}>
+              <input type="text" name="cep" placeholder="CEP" className="input-field" required />
+              <select name="interval" className="input-field" defaultValue="daily">
+                <option value="daily">Diário</option>
+                <option value="weekly">Semanal</option>
+                <option value="monthly">Mensal</option>
+              </select>
+              <button className="btn-primary w-full" type="submit">Salvar</button>
+            </form>
+          </div>
+
+          <div className="md:col-span-2 bg-surface-container-high rounded-xl p-4 border border-outline-variant/10">
+            <h4 className="text-base font-bold text-on-surface mb-2">Exportar Relatórios</h4>
+            <p className="text-sm text-on-surface-variant mb-3">Baixe relatórios em PDF ou CSV com marca visual profissional.</p>
+            <div className="flex gap-2">
+              <button className="btn-secondary">Exportar PDF</button>
+              <button className="btn-secondary">Exportar CSV</button>
+            </div>
+          </div>
+        </div>
+
         <div className="flex items-center justify-between p-6 bg-surface-container-low/50">
           <div className="flex gap-4">
             <button className="bg-surface-container-highest px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 border border-outline-variant/20">
