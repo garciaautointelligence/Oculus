@@ -38,7 +38,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex min-h-screen bg-surface text-on-surface">
+    <div className="flex min-h-screen bg-[var(--color-surface)] text-[var(--color-on-surface)]">
       <Sidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 

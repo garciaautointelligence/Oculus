@@ -124,19 +124,19 @@ html.dark {
   }
 
   .btn-primary {
-    @apply bg-primary text-on-primary px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-primary-container hover:text-on-primary-container focus:ring-2 focus:ring-primary focus:ring-offset-2;
+    @apply bg-[var(--color-primary)] text-[var(--color-on-primary)] px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-[var(--color-primary-container)] hover:text-[var(--color-on-primary-container)] focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2;
   }
 
   .btn-secondary {
-    @apply bg-secondary-container text-on-secondary-container px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-secondary hover:text-on-secondary;
+    @apply bg-[var(--color-secondary-container)] text-[var(--color-on-secondary-container)] px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-[var(--color-secondary)] hover:text-[var(--color-on-secondary)];
   }
 
   .btn-ghost {
-    @apply text-on-surface-variant hover:text-on-surface hover:bg-surface-container px-3 py-2 rounded-lg transition-all duration-200;
+    @apply text-[var(--color-on-surface-variant)] hover:text-[var(--color-on-surface)] hover:bg-[var(--color-surface-container)] px-3 py-2 rounded-lg transition-all duration-200;
   }
 
   .input-field {
-    @apply bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-on-surface placeholder-on-surface-variant focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200;
+    @apply bg-[var(--color-surface-container)] border border-[var(--color-outline-variant)] rounded-lg px-3 py-2 text-[var(--color-on-surface)] placeholder-[var(--color-on-surface-variant)] focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all duration-200;
   }
 
   .text-flicker {

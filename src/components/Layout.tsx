@@ -46,20 +46,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onNew
       )}
 
       <aside className={cn(
-        "fixed left-0 top-0 h-full w-64 bg-surface border-r border-outline-variant/10 flex flex-col z-50 card-soft gradient-panel transition-transform duration-300 ease-in-out",
+        "fixed left-0 top-0 h-full w-64 bg-[var(--color-surface)] border-r border-[var(--color-outline-variant)]/10 flex flex-col z-50 card-soft gradient-panel transition-transform duration-300 ease-in-out",
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         <div className="p-6">
           <div className="flex items-center justify-between lg:justify-start">
-            <h1 className="text-xl font-extrabold text-on-surface font-headline tracking-tighter">Oculus</h1>
+            <h1 className="text-xl font-extrabold text-[var(--color-on-surface)] font-headline tracking-tighter">Oculus</h1>
             <button 
               onClick={() => setIsOpen(false)}
-              className="lg:hidden p-1 rounded-lg hover:bg-surface-container"
+              className="lg:hidden p-1 rounded-lg hover:bg-[var(--color-surface-container)]"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
-          <p className="text-[10px] text-primary font-bold uppercase tracking-widest mt-1">Garcia Intelligence</p>
+          <p className="text-[10px] text-[var(--color-primary)] font-bold uppercase tracking-widest mt-1">Garcia Intelligence</p>
         </div>
 
         <nav className="flex-1 px-4 space-y-1 mt-4">
@@ -73,11 +73,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onNew
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group",
                 activeTab === item.id 
-                  ? "bg-surface-container-high text-tertiary border-l-4 border-tertiary" 
-                  : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
+                  ? "bg-[var(--color-surface-container-high)] text-[var(--color-tertiary)] border-l-4 border-[var(--color-tertiary)]" 
+                  : "text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] hover:text-[var(--color-on-surface)]"
               )}
             >
-              <item.icon className={cn("w-5 h-5", activeTab === item.id ? "text-primary" : "text-on-surface-variant group-hover:text-on-surface")} />
+              <item.icon className={cn("w-5 h-5", activeTab === item.id ? "text-[var(--color-primary)]" : "text-[var(--color-on-surface-variant)] group-hover:text-[var(--color-on-surface)]")} />
               <span className="text-sm font-medium">{item.label}</span>
             </button>
           ))}
@@ -89,19 +89,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onNew
               onNewAnalysis();
               setIsOpen(false);
             }}
-            className="w-full bg-gradient-to-r from-tertiary via-yellow-300 to-primary text-black drop-shadow-xl font-bold py-3 rounded-md flex items-center justify-center gap-2 hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 shadow-xl shadow-tertiary/30 transition-all"
+            className="w-full bg-gradient-to-r from-[var(--color-tertiary)] via-yellow-300 to-[var(--color-primary)] text-black drop-shadow-xl font-bold py-3 rounded-md flex items-center justify-center gap-2 hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 shadow-xl shadow-[var(--color-tertiary)]/30 transition-all"
             aria-label="Iniciar nova análise"
           >
             <PlusCircle className="w-4 h-4" />
             <span className="text-sm tracking-wide leading-tight">Nova Análise</span>
           </button>
 
-          <div className="pt-4 border-t border-outline-variant/10 space-y-1">
-            <button className="w-full flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-on-surface transition-colors">
+          <div className="pt-4 border-t border-[var(--color-outline-variant)]/10 space-y-1">
+            <button className="w-full flex items-center gap-3 px-4 py-2 text-[var(--color-on-surface-variant)] hover:text-[var(--color-on-surface)] transition-colors">
               <HelpCircle className="w-4 h-4" />
               <span className="text-xs font-medium">Suporte</span>
             </button>
-            <button className="w-full flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-on-surface transition-colors">
+            <button className="w-full flex items-center gap-3 px-4 py-2 text-[var(--color-on-surface-variant)] hover:text-[var(--color-on-surface)] transition-colors">
               <UserCircle className="w-4 h-4" />
               <span className="text-xs font-medium">Conta</span>
             </button>
@@ -120,26 +120,26 @@ interface TopBarProps {
 
 export const TopBar: React.FC<TopBarProps> = ({ darkMode, onThemeToggle, onMenuToggle }) => {
   return (
-    <header className="sticky top-0 z-40 flex justify-between items-center w-full px-4 lg:px-8 py-4 bg-surface/80 backdrop-blur-md border-b border-outline-variant/5">
+    <header className="sticky top-0 z-40 flex justify-between items-center w-full px-4 lg:px-8 py-4 bg-[var(--color-surface)]/80 backdrop-blur-md border-b border-[var(--color-outline-variant)]/5">
       <div className="flex items-center gap-4">
         <button 
           onClick={onMenuToggle}
-          className="lg:hidden p-2 rounded-lg hover:bg-surface-container"
+          className="lg:hidden p-2 rounded-lg hover:bg-[var(--color-surface-container)]"
           aria-label="Toggle menu"
         >
           <Menu className="w-5 h-5" />
         </button>
-        <h2 className="text-xl lg:text-2xl font-black tracking-tighter text-on-surface font-headline uppercase">Oculus</h2>
-        <div className="hidden lg:block h-6 w-px bg-outline-variant/20"></div>
+        <h2 className="text-xl lg:text-2xl font-black tracking-tighter text-[var(--color-on-surface)] font-headline uppercase">Oculus</h2>
+        <div className="hidden lg:block h-6 w-px bg-[var(--color-outline-variant)]/20"></div>
         <nav className="hidden lg:flex gap-6">
-          <button className="text-on-surface-variant hover:text-on-surface font-headline font-bold text-sm transition-colors">Explorar</button>
-          <button className="text-primary border-b-2 border-primary pb-1 font-headline font-bold text-sm">Histórico</button>
+          <button className="text-[var(--color-on-surface-variant)] hover:text-[var(--color-on-surface)] font-headline font-bold text-sm transition-colors">Explorar</button>
+          <button className="text-[var(--color-primary)] border-b-2 border-[var(--color-primary)] pb-1 font-headline font-bold text-sm">Histórico</button>
         </nav>
       </div>
 
       <div className="flex items-center gap-4">
         <div className="relative group hidden md:block">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-on-surface-variant)]" />
           <input 
             type="text" 
             placeholder="Filtrar histórico..." 
@@ -149,13 +149,13 @@ export const TopBar: React.FC<TopBarProps> = ({ darkMode, onThemeToggle, onMenuT
 
         <button
           onClick={onThemeToggle}
-          className="p-2 text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors"
+          className="p-2 text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] rounded-lg transition-colors"
           aria-label="Alternar tema"
         >
           {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
         </button>
 
-        <button className="p-2 text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors relative">
+        <button className="p-2 text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container)] rounded-lg transition-colors relative">
           <Bell className="w-5 h-5" />
         </button>
       </div>
