@@ -38,7 +38,7 @@ export const Dashboard: React.FC = () => {
     lastUpdated: new Date().toLocaleTimeString()
   });
 
-  const handleReloadSearch = (search: Search, forceReload: boolean = false) => 
+  const handleReloadSearch = (search: Search, forceReload: boolean = false) => {
     sessionStorage.setItem('reload_search', JSON.stringify({
       cep: search.cep,
       radius: search.raio_km.toString(),
