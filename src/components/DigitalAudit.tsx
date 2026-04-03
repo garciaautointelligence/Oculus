@@ -207,7 +207,7 @@ export const DigitalAudit: React.FC<DigitalAuditProps> = ({ lead }) => {
                 - Boa base para operação local. Sugestão de próximos passos: validar informações no Google Maps e publicar alterações nos perfis sociais.
               </p>
               <p className="text-sm text-on-surface-variant leading-relaxed mt-1">
-                - Se o site não usar HTTPS, considere migração rápida; para leads com notas < 60, priorizar correção de contacto e SEO on-page.
+                - Se o site não usar HTTPS, considere migração rápida; para leads com notas &lt; 60, priorizar correção de contacto e SEO on-page.
               </p>
             </div>
 
