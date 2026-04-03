@@ -1,3 +1,10 @@
+<<<<<<< HEAD
+=======
+<div align="center">
+
+</div>
+
+>>>>>>> f42cafe3d6ac0148a7e9cbda313caee9d959ff48
 # Oculus - Market Analysis App
 
 Aplicativo de análise de mercado e presença digital com interface moderna e premium. A integração de dados é realizada via n8n (webhook) e utiliza Supabase como backend para armazenamento e gerenciamento de dados.
